@@ -3,12 +3,17 @@ import { OpeningNode } from "../types/opening";
 /**
  * Selects a random move from the available children based on frequency weights
  * @param children - The available child moves
+ * @param allowedMoves - Optional array of moves to restrict selection to
  * @returns The selected move key, or null if no moves available
  */
 export function selectWeightedMove(
-  children: Record<string, OpeningNode>
+  children: Record<string, OpeningNode>,
+  allowedMoves?: string[]
 ): string | null {
-  const moves = Object.keys(children);
+  const allMoves = Object.keys(children);
+  const moves = allowedMoves
+    ? allMoves.filter((move) => allowedMoves.includes(move))
+    : allMoves;
 
   if (moves.length === 0) {
     return null;

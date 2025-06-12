@@ -148,10 +148,96 @@
                                                                     "frequency": 0.24,
                                                                     "comment": "Natural development, attacking e4.",
                                                                     "children": {
-                                                                        "Ng5": {
-                                                                            "move": "Ng5",
-                                                                            "comment": "Immediate pressure on f7",
-                                                                            "isEndOfVariation": true
+                                                                        "e5": {
+                                                                            "move": "e5",
+                                                                            "comment": "Advancing the pawn, challenging the knight.",
+                                                                            "children": {
+                                                                                "d5": {
+                                                                                    "move": "d5",
+                                                                                    "frequency": 0.4,
+                                                                                    "comment": "Immediately challenging White's central pawn.",
+                                                                                    "children": {
+                                                                                        "Bb5": {
+                                                                                            "move": "Bb5",
+                                                                                            "comment": "Pinning the c6 knight and increasing pressure.",
+                                                                                            "isEndOfVariation": true
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                "Ng4": {
+                                                                                    "move": "Ng4",
+                                                                                    "frequency": 0.22,
+                                                                                    "comment": "A sharp counter-attack, putting pressure on f2.",
+                                                                                    "children": {
+                                                                                        "Bxf7+": {
+                                                                                            "move": "Bxf7+",
+                                                                                            "comment": "Sacrificing the bishop to expose the king.",
+                                                                                            "children": {
+                                                                                                "Kxf7": {
+                                                                                                    "move": "Kxf7",
+                                                                                                    "comment": "Forced capture.",
+                                                                                                    "children": {
+                                                                                                        "Ng5+": {
+                                                                                                            "move": "Ng5+",
+                                                                                                            "comment": "Another check, bringing the knight into the attack.",
+                                                                                                            "children": {
+                                                                                                                "Kg8": {
+                                                                                                                    "move": "Kg8",
+                                                                                                                    "frequency": 0.54,
+                                                                                                                    "comment": "The king moves to a seemingly safer square.",
+                                                                                                                    "children": {
+                                                                                                                        "Qxg4": {
+                                                                                                                            "move": "Qxg4",
+                                                                                                                            "comment": "Capturing the knight with a strong attack.",
+                                                                                                                            "isEndOfVariation": true
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                },
+                                                                                                                "Ke8": {
+                                                                                                                    "move": "Ke8",
+                                                                                                                    "frequency": 0.39,
+                                                                                                                    "comment": "The king moves back towards the center.",
+                                                                                                                    "children": {
+                                                                                                                        "Qxg4": {
+                                                                                                                            "move": "Qxg4",
+                                                                                                                            "comment": "Capturing the knight with a strong attack.",
+                                                                                                                            "isEndOfVariation": true
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                "Ne4": {
+                                                                                    "move": "Ne4",
+                                                                                    "frequency": 0.15,
+                                                                                    "comment": "The knight finds a strong central outpost.",
+                                                                                    "children": {
+                                                                                        "O-O": {
+                                                                                            "move": "O-O",
+                                                                                            "comment": "White castles, securing the king and preparing to pressure the center.",
+                                                                                            "isEndOfVariation": true
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                "Qe7": {
+                                                                                    "move": "Qe7",
+                                                                                    "frequency": 0.13,
+                                                                                    "comment": "The queen develops and challenges White's e5 pawn.",
+                                                                                    "children": {
+                                                                                        "O-O": {
+                                                                                            "move": "O-O",
+                                                                                            "comment": "White castles, preparing to challenge the e-file and potentially pin the queen.",
+                                                                                            "isEndOfVariation": true
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
                                                                         }
                                                                     }
                                                                 },
@@ -159,7 +245,38 @@
                                                                     "move": "h6",
                                                                     "frequency": 0.22,
                                                                     "comment": "Preventing Ng5, a common prophylactic move.",
-                                                                    "isEndOfVariation": true
+                                                                    "children": {
+                                                                        "c3": {
+                                                                            "move": "c3",
+                                                                            "comment": "White plays a classic gambit move, preparing to control the center.",
+                                                                            "children": {
+                                                                                "dxc3": {
+                                                                                    "move": "dxc3",
+                                                                                    "frequency": 0.7,
+                                                                                    "comment": "Black accepts the pawn.",
+                                                                                    "children": {
+                                                                                        "O-O": {
+                                                                                            "move": "O-O",
+                                                                                            "comment": "White ignores the pawn and castles, prioritizing development and king safety.",
+                                                                                            "isEndOfVariation": true
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                "Nf6": {
+                                                                                    "move": "Nf6",
+                                                                                    "frequency": 0.09,
+                                                                                    "comment": "Black develops and ignores the c3 pawn.",
+                                                                                    "children": {
+                                                                                        "e5": {
+                                                                                            "move": "e5",
+                                                                                            "comment": "White attacks the knight.",
+                                                                                            "isEndOfVariation": true
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 },
                                                                 "Bb4+": {
                                                                     "move": "Bb4+",
@@ -168,17 +285,53 @@
                                                                     "children": {
                                                                         "c3": {
                                                                             "move": "c3",
-                                                                            "comment": "Offering the pawn",
+                                                                            "comment": "Offering the pawn.",
                                                                             "children": {
                                                                                 "dxc3": {
                                                                                     "move": "dxc3",
-                                                                                    "frequency": 0.6,
-                                                                                    "comment": "Taking the pawn",
+                                                                                    "comment": "Black accepts the gambit.",
                                                                                     "children": {
-                                                                                        "Nxc3": {
-                                                                                            "move": "Nxc3",
-                                                                                            "comment": "Rapid development",
-                                                                                            "isEndOfVariation": true
+                                                                                        "O-O": {
+                                                                                            "move": "O-O",
+                                                                                            "comment": "White castles, sacrificing another pawn for rapid development.",
+                                                                                            "children": {
+                                                                                                "cxb2": {
+                                                                                                    "move": "cxb2",
+                                                                                                    "frequency": 0.36,
+                                                                                                    "comment": "Black gets greedy, opening the b-file for White's pieces.",
+                                                                                                    "children": {
+                                                                                                        "Bxb2": {
+                                                                                                            "move": "Bxb2",
+                                                                                                            "comment": "White develops the bishop with tempo, eyeing the weak kingside.",
+                                                                                                            "isEndOfVariation": true
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                "Ne7": {
+                                                                                                    "move": "Ne7",
+                                                                                                    "frequency": 0.18,
+                                                                                                    "comment": "A solid developing move.",
+                                                                                                    "children": {
+                                                                                                        "Ng5": {
+                                                                                                            "move": "Ng5",
+                                                                                                            "comment": "Putting immediate pressure on the f7 square.",
+                                                                                                            "isEndOfVariation": true
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                "Nf6": {
+                                                                                                    "move": "Nf6",
+                                                                                                    "frequency": 0.16,
+                                                                                                    "comment": "Developing the knight.",
+                                                                                                    "children": {
+                                                                                                        "e5": {
+                                                                                                            "move": "e5",
+                                                                                                            "comment": "Attacking the knight and cramping Black's position.",
+                                                                                                            "isEndOfVariation": true
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
                                                                                         }
                                                                                     }
                                                                                 }
