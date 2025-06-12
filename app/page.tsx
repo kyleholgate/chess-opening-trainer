@@ -1,103 +1,172 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import ChessBoard from "../components/ChessBoard";
+import { OpeningNode } from "../types/opening";
+import { parseOpeningTree } from "../utils/opening-parser";
+import scotchGambitData from "../data/scotch-gambit.json";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [openingTree, setOpeningTree] = useState<OpeningNode | null>(null);
+  const [gameStats, setGameStats] = useState({
+    totalMoves: 0,
+    correctMoves: 0,
+    incorrectMoves: 0,
+    completedVariations: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Load and parse opening tree on component mount
+  useEffect(() => {
+    try {
+      const parsedTree = parseOpeningTree(scotchGambitData);
+      setOpeningTree(parsedTree);
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to load opening data");
+      setLoading(false);
+      console.error("Error parsing opening tree:", err);
+    }
+  }, []);
+
+  // Handle game state changes
+  const handleGameStateChange = (state: {
+    position: string;
+    moveHistory: string[];
+    currentNode: OpeningNode;
+    feedback: string;
+    isComplete: boolean;
+  }) => {
+    // Update stats when game completes
+    if (state.isComplete) {
+      setGameStats((prev) => ({
+        ...prev,
+        completedVariations: prev.completedVariations + 1,
+      }));
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">
+            Loading Scotch Gambit trainer...
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    );
+  }
+
+  if (error || !openingTree) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold text-red-600 mb-2">
+            Error Loading Trainer
+          </h1>
+          <p className="text-gray-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="container mx-auto px-4 py-8 pb-16">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            ♛ Scotch Gambit Trainer
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Master the Scotch Gambit opening! Play the correct moves as White,
+            and the computer will respond as Black. Learn this aggressive
+            opening through interactive practice.
+          </p>
+        </div>
+
+        {/* Chess Board */}
+        <div className="flex justify-center mb-12">
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <ChessBoard
+              openingTree={openingTree}
+              onGameStateChange={handleGameStateChange}
+            />
+          </div>
+        </div>
+
+        {/* Opening Information */}
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              About the Scotch Gambit
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-lg font-medium text-gray-700 mb-2">
+                  Opening Moves
+                </h3>
+                <div className="bg-gray-50 p-4 rounded-lg font-mono text-sm">
+                  1. e4 e5
+                  <br />
+                  2. Nf3 Nc6
+                  <br />
+                  3. d4 exd4
+                  <br />
+                  4. Bc4 (The Gambit!)
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-gray-700 mb-2">
+                  Key Ideas
+                </h3>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• Rapid piece development</li>
+                  <li>• Pressure on f7 square</li>
+                  <li>• Active piece play over material</li>
+                  <li>• Sharp tactical positions</li>
+                  <li>• Initiative in the opening</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <div className="max-w-2xl mx-auto mt-8">
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-amber-800 mb-2">
+              📝 How to Use This Trainer
+            </h3>
+            <ul className="text-sm text-amber-700 space-y-2">
+              <li>
+                1. <strong>You play as White</strong> - drag pieces to make your
+                moves
+              </li>
+              <li>
+                2. <strong>Follow the opening theory</strong> - only correct
+                moves are accepted
+              </li>
+              <li>
+                3. <strong>Black responds automatically</strong> - with weighted
+                realistic moves
+              </li>
+              <li>
+                4. <strong>Learn from feedback</strong> - incorrect moves show
+                helpful hints
+              </li>
+              <li>
+                5. <strong>Complete variations</strong> - reach the end of each
+                line to master it
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

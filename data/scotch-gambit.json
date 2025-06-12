@@ -1,0 +1,210 @@
+{
+    "move": null,
+    "comment": "Scotch Gambit - Root position",
+    "children": {
+        "e4": {
+            "move": "e4",
+            "comment": "King's pawn opening",
+            "children": {
+                "e5": {
+                    "move": "e5",
+                    "frequency": 0.8,
+                    "comment": "Most common response",
+                    "children": {
+                        "Nf3": {
+                            "move": "Nf3",
+                            "comment": "Attacking the pawn",
+                            "children": {
+                                "Nc6": {
+                                    "move": "Nc6",
+                                    "frequency": 0.7,
+                                    "comment": "Defending the pawn",
+                                    "children": {
+                                        "d4": {
+                                            "move": "d4",
+                                            "comment": "The Scotch opening",
+                                            "children": {
+                                                "exd4": {
+                                                    "move": "exd4",
+                                                    "frequency": 0.9,
+                                                    "comment": "Taking the pawn",
+                                                    "children": {
+                                                        "Bc4": {
+                                                            "move": "Bc4",
+                                                            "comment": "The Scotch Gambit! Developing with tempo",
+                                                            "children": {
+                                                                "Bc5": {
+                                                                    "move": "Bc5",
+                                                                    "frequency": 0.24,
+                                                                    "comment": "Developing the bishop, aiming at f2 or controlling d4.",
+                                                                    "children": {
+                                                                        "c3": {
+                                                                            "move": "c3",
+                                                                            "comment": "Preparing to recapture on d4 or challenge Black's bishop.",
+                                                                            "children": {
+                                                                                "dxc3": {
+                                                                                    "move": "dxc3",
+                                                                                    "frequency": 0.7,
+                                                                                    "comment": "Taking the offered pawn.",
+                                                                                    "children": {
+                                                                                        "Bxf7+": {
+                                                                                            "move": "Bxf7+",
+                                                                                            "comment": "A sharp sacrifice, forcing the king to move.",
+                                                                                            "children": {
+                                                                                                "Kxf7": {
+                                                                                                    "move": "Kxf7",
+                                                                                                    "comment": "Forced capture.",
+                                                                                                    "children": {
+                                                                                                        "Qd5+": {
+                                                                                                            "move": "Qd5+",
+                                                                                                            "comment": "Checking the king and attacking the loose bishop.",
+                                                                                                            "children": {
+                                                                                                                "Ke8": {
+                                                                                                                    "move": "Ke8",
+                                                                                                                    "frequency": 0.83,
+                                                                                                                    "comment": "The king retreats.",
+                                                                                                                    "children": {
+                                                                                                                        "Qh5+": {
+                                                                                                                            "move": "Qh5+",
+                                                                                                                            "comment": "Another check, forcing a weakness.",
+                                                                                                                            "children": {
+                                                                                                                                "g6": {
+                                                                                                                                    "move": "g6",
+                                                                                                                                    "frequency": 0.86,
+                                                                                                                                    "comment": "Forced, but weakens the kingside.",
+                                                                                                                                    "children": {
+                                                                                                                                        "Qxc5": {
+                                                                                                                                            "move": "Qxc5",
+                                                                                                                                            "comment": "Winning back the piece with a strong position.",
+                                                                                                                                            "isEndOfVariation": true
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                },
+                                                                                                                "Kf8": {
+                                                                                                                    "move": "Kf8",
+                                                                                                                    "frequency": 0.13,
+                                                                                                                    "comment": "A less common king retreat.",
+                                                                                                                    "children": {
+                                                                                                                        "Qxc5": {
+                                                                                                                            "move": "Qxc5",
+                                                                                                                            "comment": "Winning back the piece immediately.",
+                                                                                                                            "children": {
+                                                                                                                                "d6": {
+                                                                                                                                    "move": "d6",
+                                                                                                                                    "comment": "Solidifying the center.",
+                                                                                                                                    "children": {
+                                                                                                                                        "Nxc3": {
+                                                                                                                                            "move": "Nxc3",
+                                                                                                                                            "comment": "Recapturing the pawn and continuing development.",
+                                                                                                                                            "isEndOfVariation": true
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                },
+                                                                                                                                "Qe7": {
+                                                                                                                                    "move": "Qe7",
+                                                                                                                                    "comment": "Developing the queen.",
+                                                                                                                                    "children": {
+                                                                                                                                        "Nxc3": {
+                                                                                                                                            "move": "Nxc3",
+                                                                                                                                            "comment": "Recapturing the pawn and continuing development.",
+                                                                                                                                            "isEndOfVariation": true
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                "Nf6": {
+                                                                                    "move": "Nf6",
+                                                                                    "frequency": 0.13,
+                                                                                    "comment": "Developing and ignoring the c3 pawn for now.",
+                                                                                    "children": {
+                                                                                        "e5": {
+                                                                                            "move": "e5",
+                                                                                            "comment": "Pushing the pawn to attack the knight.",
+                                                                                            "isEndOfVariation": true
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "Nf6": {
+                                                                    "move": "Nf6",
+                                                                    "frequency": 0.24,
+                                                                    "comment": "Natural development, attacking e4.",
+                                                                    "children": {
+                                                                        "Ng5": {
+                                                                            "move": "Ng5",
+                                                                            "comment": "Immediate pressure on f7",
+                                                                            "isEndOfVariation": true
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "h6": {
+                                                                    "move": "h6",
+                                                                    "frequency": 0.22,
+                                                                    "comment": "Preventing Ng5, a common prophylactic move.",
+                                                                    "isEndOfVariation": true
+                                                                },
+                                                                "Bb4+": {
+                                                                    "move": "Bb4+",
+                                                                    "frequency": 0.08,
+                                                                    "comment": "Checking to disrupt White's development.",
+                                                                    "children": {
+                                                                        "c3": {
+                                                                            "move": "c3",
+                                                                            "comment": "Offering the pawn",
+                                                                            "children": {
+                                                                                "dxc3": {
+                                                                                    "move": "dxc3",
+                                                                                    "frequency": 0.6,
+                                                                                    "comment": "Taking the pawn",
+                                                                                    "children": {
+                                                                                        "Nxc3": {
+                                                                                            "move": "Nxc3",
+                                                                                            "comment": "Rapid development",
+                                                                                            "isEndOfVariation": true
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "d6": {
+                                                                    "move": "d6",
+                                                                    "frequency": 0.07,
+                                                                    "comment": "Solidifying the e5 pawn and opening lines for the c8 bishop.",
+                                                                    "isEndOfVariation": true
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
