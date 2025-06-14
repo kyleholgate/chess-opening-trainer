@@ -365,7 +365,7 @@ export default function ChessBoard({
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="w-full">
         {/* Mobile Sidebar Overlay */}
         <AnimatePresence>
           {sidebarOpen && (
@@ -507,7 +507,7 @@ export default function ChessBoard({
 
           {/* Main Content */}
           <motion.div
-            className="flex-1 flex flex-col lg:min-h-screen"
+            className="flex-1 flex flex-col"
             animate={{
               marginLeft:
                 typeof window !== "undefined" &&
@@ -525,30 +525,38 @@ export default function ChessBoard({
           >
             {/* Top Bar */}
             <div className="bg-white shadow-sm border-b border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="lg:hidden"
-                >
-                  ☰ Settings
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="hidden lg:flex"
-                >
-                  {sidebarOpen ? "← Hide Panel" : "→ Show Panel"}
+              <div className="flex items-center justify-between gap-2">
+                {/* Settings toggle buttons */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="lg:hidden"
+                  >
+                    ☰ Settings
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="hidden lg:flex"
+                  >
+                    {sidebarOpen ? "← Hide Panel" : "→ Show Panel"}
+                  </Button>
+                </div>
+
+                {/* Reset Game */}
+                <Button onClick={resetGame} variant="default" size="sm">
+                  Reset Game
                 </Button>
               </div>
             </div>
 
             {/* Game Area */}
-            <div className="flex-1 flex flex-col items-center justify-center p-4 lg:p-6 space-y-4 lg:space-y-6">
+            <div className="flex-1 flex flex-col items-center justify-start p-4 lg:p-6 space-y-4 lg:space-y-6">
               {/* Chess Board */}
-              <div className="w-full max-w-[350px] aspect-square sm:max-w-[400px] md:max-w-[500px] lg:max-w-[600px]">
+              <div className="w-full max-w-[400px] aspect-square sm:max-w-[500px] md:max-w-[600px] lg:max-w-[600px]">
                 <Chessboard
                   position={gamePosition}
                   onPieceDrop={onDrop}
@@ -580,16 +588,8 @@ export default function ChessBoard({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <Button
-                  onClick={resetGame}
-                  variant="default"
-                  className="w-full sm:w-auto"
-                >
-                  Reset Game
-                </Button>
-
-                {isComplete && (
+              {isComplete && (
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <Button
                     onClick={resetGame}
                     variant="secondary"
@@ -597,8 +597,8 @@ export default function ChessBoard({
                   >
                     Practice Again
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>

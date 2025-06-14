@@ -8,7 +8,7 @@ import scotchGambitData from "../data/scotch-gambit.json";
 
 export default function Home() {
   const [openingTree, setOpeningTree] = useState<OpeningNode | null>(null);
-  const [gameStats, setGameStats] = useState({
+  const [, setGameStats] = useState({
     totalMoves: 0,
     correctMoves: 0,
     incorrectMoves: 0,
@@ -91,7 +91,7 @@ export default function Home() {
 
         {/* Chess Board */}
         <div className="flex justify-center mb-12">
-          <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="bg-white rounded-xl shadow-lg p-8 w-full">
             <ChessBoard
               openingTree={openingTree}
               onGameStateChange={handleGameStateChange}
