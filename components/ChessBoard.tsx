@@ -1,27 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
-import { motion, AnimatePresence } from "motion/react";
 import { OpeningNode } from "../types/opening";
 import { selectWeightedMove } from "../utils/weighted-selection";
 import { isValidMove } from "../utils/opening-parser";
-import { Button } from "./ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
-import { Checkbox } from "./ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 
 interface ChessBoardProps {
   openingTree: OpeningNode;
@@ -38,46 +22,39 @@ interface BoardTheme {
   name: string;
   darkSquares: string;
   lightSquares: string;
-  border?: string;
 }
 
-const BOARD_THEMES: BoardTheme[] = [
+const RETRO_BOARD_THEMES: BoardTheme[] = [
   {
-    name: "Wooden",
-    darkSquares: "#B8860B",
-    lightSquares: "#F5DEB3",
-    border: "#8B5A2B",
+    name: "Classic Beige",
+    darkSquares: "#808080",
+    lightSquares: "#C3C3C3",
   },
   {
-    name: "Classic",
-    darkSquares: "#8B4513",
-    lightSquares: "#F0D9B5",
-    border: "#654321",
+    name: "Teal Gray",
+    darkSquares: "#008080",
+    lightSquares: "#DFDFDF",
   },
   {
-    name: "Blue",
-    darkSquares: "#4A90E2",
-    lightSquares: "#E3F2FD",
-    border: "#2171B5",
+    name: "Monochrome",
+    darkSquares: "#404040",
+    lightSquares: "#FFFFFF",
   },
-  {
-    name: "Green",
-    darkSquares: "#769656",
-    lightSquares: "#EEEED2",
-    border: "#5A7A3A",
-  },
-  {
-    name: "Purple",
-    darkSquares: "#8B4789",
-    lightSquares: "#E8D5E8",
-    border: "#6B3569",
-  },
-  {
-    name: "Modern",
-    darkSquares: "#2D3748",
-    lightSquares: "#F7FAFC",
-    border: "#1A202C",
-  },
+];
+
+const pieces = [
+  "wP",
+  "wN",
+  "wB",
+  "wR",
+  "wQ",
+  "wK",
+  "bP",
+  "bN",
+  "bB",
+  "bR",
+  "bQ",
+  "bK",
 ];
 
 export default function ChessBoard({
@@ -127,26 +104,33 @@ export default function ChessBoard({
   const [isPlayerTurn, setIsPlayerTurn] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<BoardTheme>(
-    BOARD_THEMES[0]
+    RETRO_BOARD_THEMES[0]
   );
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Handle responsive sidebar - open by default on desktop
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        // lg breakpoint
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
-      }
-    };
-
-    // Set initial state
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+  // Custom pieces with PNG images
+  const customPieces = useMemo(() => {
+    const pieceComponents: {
+      [key: string]: ({
+        squareWidth,
+      }: {
+        squareWidth: number;
+      }) => React.ReactElement;
+    } = {};
+    pieces.forEach((piece) => {
+      pieceComponents[piece] = ({ squareWidth }) => (
+        <div
+          style={{
+            width: squareWidth,
+            height: squareWidth,
+            backgroundImage: `url(/pieces/${piece}.svg)`,
+            backgroundSize: "100%",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+          }}
+        />
+      );
+    });
+    return pieceComponents;
   }, []);
 
   // Get available variations (Black's responses after Bc4)
@@ -203,7 +187,7 @@ export default function ChessBoard({
       const opponentMove = selectWeightedMove(node.children, allowedMoves);
 
       if (!opponentMove) {
-        setFeedback("🎉 You've reached the end of this line!");
+        setFeedback("You've reached the end of this line!");
         setIsComplete(true);
         return;
       }
@@ -278,7 +262,7 @@ export default function ChessBoard({
         if (!isValidMove(currentNode, moveString)) {
           // Invalid opening move - undo it
           game.undo();
-          setFeedback(`❌ "${moveString}" is not the correct move. Try again!`);
+          setFeedback(`"${moveString}" is not the correct move. Try again!`);
           return false;
         }
 
@@ -290,7 +274,7 @@ export default function ChessBoard({
         setMoveHistory(newMoveHistory);
         setCurrentNode(newNode);
         setIsPlayerTurn(false);
-        setFeedback(`✅ Good! You played ${moveString}`);
+        setFeedback(`Good! You played ${moveString}`);
 
         // Check if we've reached the end of this variation
         if (
@@ -298,7 +282,7 @@ export default function ChessBoard({
           Object.keys(newNode.children).length === 0
         ) {
           setFeedback(
-            `🎉 Excellent! You've completed this variation. ${
+            `Excellent! You've completed this variation. ${
               newNode.comment || ""
             }`
           );
@@ -307,7 +291,7 @@ export default function ChessBoard({
             position: game.fen(),
             moveHistory: newMoveHistory,
             currentNode: newNode,
-            feedback: `🎉 Variation complete! ${newNode.comment || ""}`,
+            feedback: `Variation complete! ${newNode.comment || ""}`,
             isComplete: true,
           });
           return true;
@@ -364,199 +348,13 @@ export default function ChessBoard({
   };
 
   return (
-    <TooltipProvider>
-      <div className="w-full">
-        {/* Mobile Sidebar Overlay */}
-        <AnimatePresence>
-          {sidebarOpen && (
-            <motion.div
-              className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-              onClick={() => setSidebarOpen(false)}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            />
-          )}
-        </AnimatePresence>
-
-        <div className="lg:flex lg:h-screen">
-          {/* Sidebar */}
-          <motion.div
-            className="fixed lg:relative top-0 left-0 h-full z-50 lg:z-auto bg-white shadow-lg border-r border-gray-200 overflow-hidden"
-            initial={false}
-            animate={{
-              width: sidebarOpen ? 320 : 0,
-              x: sidebarOpen
-                ? 0
-                : typeof window !== "undefined" && window.innerWidth < 1024
-                ? -320
-                : 0,
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
-              duration: 0.3,
-            }}
-            style={{
-              display:
-                sidebarOpen ||
-                (typeof window !== "undefined" && window.innerWidth >= 1024)
-                  ? "block"
-                  : "none",
-            }}
-          >
-            <div className="p-6 space-y-6 h-full overflow-y-auto">
-              {/* Sidebar Header */}
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Settings
-                </h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="lg:hidden"
-                >
-                  ✕
-                </Button>
-              </div>
-
-              {/* Theme Selector */}
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-900">
-                  Board Theme
-                </label>
-                <Select
-                  value={selectedTheme.name}
-                  onValueChange={(value) => {
-                    const theme = BOARD_THEMES.find((t) => t.name === value);
-                    if (theme) setSelectedTheme(theme);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BOARD_THEMES.map((theme) => (
-                      <SelectItem key={theme.name} value={theme.name}>
-                        {theme.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Variation Selector */}
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-gray-900">
-                  Practice Against
-                </label>
-                <div className="grid grid-cols-1 gap-2">
-                  {availableVariations.map((variation) => (
-                    <Tooltip key={variation.move}>
-                      <TooltipTrigger asChild>
-                        <label className="flex items-center space-x-3 cursor-pointer p-3 rounded-md hover:bg-gray-50 transition-colors border border-gray-200">
-                          <Checkbox
-                            checked={selectedVariations.includes(
-                              variation.move
-                            )}
-                            onCheckedChange={() =>
-                              handleVariationToggle(variation.move)
-                            }
-                          />
-                          <span className="text-sm font-medium text-gray-900">
-                            {variation.move}
-                          </span>
-                        </label>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{variation.comment}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  ))}
-                </div>
-              </div>
-
-              {/* Move History */}
-              {moveHistory.length > 0 && (
-                <div className="space-y-3">
-                  <label className="text-sm font-semibold text-gray-900">
-                    Move History
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
-                    <p className="text-sm font-mono text-gray-800 leading-relaxed">
-                      {moveHistory.map((move, index) => {
-                        const moveNumber = Math.floor(index / 2) + 1;
-                        const isWhiteMove = index % 2 === 0;
-                        return (
-                          <span key={index}>
-                            {isWhiteMove && `${moveNumber}. `}
-                            {move}
-                            {!isWhiteMove && " "}
-                          </span>
-                        );
-                      })}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Main Content */}
-          <motion.div
-            className="flex-1 flex flex-col"
-            animate={{
-              marginLeft:
-                typeof window !== "undefined" &&
-                window.innerWidth >= 1024 &&
-                sidebarOpen
-                  ? 0
-                  : 0,
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
-              duration: 0.3,
-            }}
-          >
-            {/* Top Bar */}
-            <div className="bg-white shadow-sm border-b border-gray-200 p-4">
-              <div className="flex items-center justify-between gap-2">
-                {/* Settings toggle buttons */}
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="lg:hidden"
-                  >
-                    ☰ Settings
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="hidden lg:flex"
-                  >
-                    {sidebarOpen ? "← Hide Panel" : "→ Show Panel"}
-                  </Button>
-                </div>
-
-                {/* Reset Game */}
-                <Button onClick={resetGame} variant="default" size="sm">
-                  Reset Game
-                </Button>
-              </div>
-            </div>
-
-            {/* Game Area */}
-            <div className="flex-1 flex flex-col items-center justify-start p-4 lg:p-6 space-y-4 lg:space-y-6">
-              {/* Chess Board */}
-              <div className="w-full max-w-[400px] aspect-square sm:max-w-[500px] md:max-w-[600px] lg:max-w-[600px]">
+    <div className="w-full">
+      <div className="flex flex-col lg:flex-row gap-4 h-full">
+        {/* Chess Board */}
+        <div className="flex-1">
+          <div className="win95-panel p-4">
+            <div className="win95-raised p-2">
+              <div className="w-full max-w-[400px] sm:max-w-[500px] lg:max-w-[600px] xl:max-w-[700px] mx-auto">
                 <Chessboard
                   position={gamePosition}
                   onPieceDrop={onDrop}
@@ -569,40 +367,112 @@ export default function ChessBoard({
                     backgroundColor: selectedTheme.lightSquares,
                   }}
                   customDropSquareStyle={{
-                    boxShadow: "inset 0 0 1px 6px rgba(255,255,0,0.75)",
+                    boxShadow: "inset 0 0 1px 4px #FF0000",
                   }}
+                  customPieces={customPieces}
                   animationDuration={200}
                 />
               </div>
+            </div>
 
-              {/* Feedback */}
-              <div className="text-center max-w-md px-4">
-                <p className="text-base lg:text-lg font-semibold mb-2 text-gray-800">
-                  {feedback}
-                </p>
-                {currentNode.comment && (
-                  <p className="text-sm lg:text-base text-gray-700 italic font-medium">
-                    {currentNode.comment}
-                  </p>
-                )}
+            {/* Feedback Area */}
+            <div className="win95-panel p-3 mt-4">
+              <div className="font-vt323 text-black text-sm">
+                <div className="font-bold mb-1">Status:</div>
+                <div>{feedback}</div>
               </div>
+            </div>
 
-              {/* Action Buttons */}
+            {/* Control Buttons */}
+            <div className="flex gap-2 mt-4">
+              <button onClick={resetGame} className="win95-button font-vt323">
+                New Game
+              </button>
               {isComplete && (
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                  <Button
-                    onClick={resetGame}
-                    variant="secondary"
-                    className="w-full sm:w-auto"
-                  >
-                    Practice Again
-                  </Button>
-                </div>
+                <button onClick={resetGame} className="win95-button font-vt323">
+                  Play Again
+                </button>
               )}
             </div>
-          </motion.div>
+          </div>
+        </div>
+
+        {/* Right Side Panel - Settings and History */}
+        <div className="w-full lg:flex-1 lg:min-w-32 lg:max-w-80">
+          {/* Theme Selector */}
+          <div className="win95-raised p-3 mb-4">
+            <div className="win95-titlebar mb-2">
+              <span className="font-vt323 text-xs">Board Theme</span>
+            </div>
+            <div className="space-y-2">
+              {RETRO_BOARD_THEMES.map((theme) => (
+                <label
+                  key={theme.name}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="theme"
+                    checked={selectedTheme.name === theme.name}
+                    onChange={() => setSelectedTheme(theme)}
+                    className="win95-radio"
+                  />
+                  <span className="font-vt323 text-xs text-black">
+                    {theme.name}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Variations */}
+          <div className="win95-raised p-3 mb-4">
+            <div className="win95-titlebar mb-2">
+              <span className="font-vt323 text-xs">Practice Against</span>
+            </div>
+            <div className="space-y-2">
+              {availableVariations.map((variation) => (
+                <label
+                  key={variation.move}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedVariations.includes(variation.move)}
+                    onChange={() => handleVariationToggle(variation.move)}
+                    className="win95-checkbox"
+                  />
+                  <span className="font-vt323 text-xs text-black font-bold">
+                    {variation.move}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Move History */}
+          <div className="win95-raised p-3">
+            <div className="win95-titlebar mb-2">
+              <span className="font-vt323 text-xs">Move History</span>
+            </div>
+            <div className="win95-input p-2 h-24 overflow-y-auto">
+              <div className="font-vt323 text-xs text-black leading-tight">
+                {moveHistory.map((move, index) => {
+                  const moveNumber = Math.floor(index / 2) + 1;
+                  const isWhiteMove = index % 2 === 0;
+                  return (
+                    <span key={index}>
+                      {isWhiteMove && `${moveNumber}. `}
+                      {move}
+                      {!isWhiteMove && " "}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </TooltipProvider>
+    </div>
   );
 }

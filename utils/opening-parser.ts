@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { OpeningNode } from "../types/opening";
 
 /**
@@ -23,31 +24,36 @@ function validateOpeningNode(node: unknown): OpeningNode {
     throw new Error("Invalid opening node");
   }
 
+  // Type assertion after runtime check - we're validating unknown data
+  const nodeData = node as OpeningNode;
+
   const validated: OpeningNode = {
-    move: node.move || null,
+    move: (nodeData.move as string) || null,
     children: {},
   };
 
   // Optional fields
-  if (node.comment) {
-    validated.comment = String(node.comment);
+  if (nodeData.comment) {
+    validated.comment = String(nodeData.comment);
   }
 
   if (
-    typeof node.frequency === "number" &&
-    node.frequency >= 0 &&
-    node.frequency <= 1
+    typeof nodeData.frequency === "number" &&
+    nodeData.frequency >= 0 &&
+    nodeData.frequency <= 1
   ) {
-    validated.frequency = node.frequency;
+    validated.frequency = nodeData.frequency;
   }
 
-  if (node.isEndOfVariation === true) {
+  if (nodeData.isEndOfVariation === true) {
     validated.isEndOfVariation = true;
   }
 
   // Validate children recursively
-  if (node.children && typeof node.children === "object") {
-    for (const [move, child] of Object.entries(node.children)) {
+  if (nodeData.children && typeof nodeData.children === "object") {
+    for (const [move, child] of Object.entries(
+      nodeData.children as Record<string, unknown>
+    )) {
       if (typeof move === "string" && move.length > 0) {
         validated.children[move] = validateOpeningNode(child);
       }

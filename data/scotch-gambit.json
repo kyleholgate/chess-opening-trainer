@@ -257,8 +257,31 @@
                                                                                     "children": {
                                                                                         "O-O": {
                                                                                             "move": "O-O",
-                                                                                            "comment": "White ignores the pawn and castles, prioritizing development and king safety.",
-                                                                                            "isEndOfVariation": true
+                                                                                            "comment": "White ignores the pawn and castles.",
+                                                                                            "children": {
+                                                                                                "cxb2": {
+                                                                                                    "move": "cxb2",
+                                                                                                    "comment": "Black grabs the b2 pawn.",
+                                                                                                    "children": {
+                                                                                                        "Bxb2": {
+                                                                                                            "move": "Bxb2",
+                                                                                                            "comment": "White recaptures, developing the bishop.",
+                                                                                                            "isEndOfVariation": true
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                "Nf6": {
+                                                                                                    "move": "Nf6",
+                                                                                                    "comment": "Black develops the knight, declining the b2 pawn for now.",
+                                                                                                    "children": {
+                                                                                                        "Re1": {
+                                                                                                            "move": "Re1",
+                                                                                                            "comment": "White improves the rook's position and prepares to fight for the e-file.",
+                                                                                                            "isEndOfVariation": true
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
                                                                                         }
                                                                                     }
                                                                                 },

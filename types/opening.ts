@@ -14,10 +14,3 @@ export interface GameState {
   gameStatus: "playing" | "correct" | "incorrect" | "complete";
   feedback?: string; // Feedback message for the player
 }
-
-export interface TrainingProgress {
-  totalMoves: number;
-  correctMoves: number;
-  incorrectMoves: number;
-  currentVariation: string[]; // The current line being practiced
-}
