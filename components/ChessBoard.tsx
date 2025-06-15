@@ -1,8 +1,16 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Chess } from "chess.js";
-import { Chessboard } from "react-chessboard";
+import {
+  BoardDisplay,
+  GameStatus,
+  GameControls,
+  SidePanel,
+  BoardTheme,
+  Variation,
+  RETRO_BOARD_THEMES,
+} from "./chessGame";
 import { OpeningNode } from "../types/opening";
 import { selectWeightedMove } from "../utils/weighted-selection";
 import { isValidMove } from "../utils/opening-parser";
@@ -17,45 +25,6 @@ interface ChessBoardProps {
     isComplete: boolean;
   }) => void;
 }
-
-interface BoardTheme {
-  name: string;
-  darkSquares: string;
-  lightSquares: string;
-}
-
-const RETRO_BOARD_THEMES: BoardTheme[] = [
-  {
-    name: "Classic Beige",
-    darkSquares: "#808080",
-    lightSquares: "#C3C3C3",
-  },
-  {
-    name: "Teal Gray",
-    darkSquares: "#008080",
-    lightSquares: "#DFDFDF",
-  },
-  {
-    name: "Monochrome",
-    darkSquares: "#404040",
-    lightSquares: "#FFFFFF",
-  },
-];
-
-const pieces = [
-  "wP",
-  "wN",
-  "wB",
-  "wR",
-  "wQ",
-  "wK",
-  "bP",
-  "bN",
-  "bB",
-  "bR",
-  "bQ",
-  "bK",
-];
 
 export default function ChessBoard({
   openingTree,
@@ -107,34 +76,8 @@ export default function ChessBoard({
     RETRO_BOARD_THEMES[0]
   );
 
-  // Custom pieces with PNG images
-  const customPieces = useMemo(() => {
-    const pieceComponents: {
-      [key: string]: ({
-        squareWidth,
-      }: {
-        squareWidth: number;
-      }) => React.ReactElement;
-    } = {};
-    pieces.forEach((piece) => {
-      pieceComponents[piece] = ({ squareWidth }) => (
-        <div
-          style={{
-            width: squareWidth,
-            height: squareWidth,
-            backgroundImage: `url(/pieces/${piece}.svg)`,
-            backgroundSize: "100%",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-          }}
-        />
-      );
-    });
-    return pieceComponents;
-  }, []);
-
   // Get available variations (Black's responses after Bc4)
-  const getAvailableVariations = () => {
+  const getAvailableVariations = (): Variation[] => {
     const startingNode = getStartingNode();
     return Object.keys(startingNode.children).map((move) => ({
       move,
@@ -353,125 +296,29 @@ export default function ChessBoard({
         {/* Chess Board */}
         <div className="flex-1">
           <div className="win95-panel p-4">
-            <div className="win95-raised p-2">
-              <div className="w-full max-w-[400px] sm:max-w-[500px] lg:max-w-[600px] xl:max-w-[700px] mx-auto">
-                <Chessboard
-                  position={gamePosition}
-                  onPieceDrop={onDrop}
-                  boardOrientation="white"
-                  arePiecesDraggable={isPlayerTurn && !isComplete}
-                  customDarkSquareStyle={{
-                    backgroundColor: selectedTheme.darkSquares,
-                  }}
-                  customLightSquareStyle={{
-                    backgroundColor: selectedTheme.lightSquares,
-                  }}
-                  customDropSquareStyle={{
-                    boxShadow: "inset 0 0 1px 4px #FF0000",
-                  }}
-                  customPieces={customPieces}
-                  animationDuration={200}
-                />
-              </div>
-            </div>
+            <BoardDisplay
+              position={gamePosition}
+              onPieceDrop={onDrop}
+              isPlayerTurn={isPlayerTurn}
+              isComplete={isComplete}
+              selectedTheme={selectedTheme}
+            />
 
-            {/* Feedback Area */}
-            <div className="win95-panel p-3 mt-4">
-              <div className="font-vt323 text-black text-sm">
-                <div className="font-bold mb-1">Status:</div>
-                <div>{feedback}</div>
-              </div>
-            </div>
+            <GameStatus feedback={feedback} />
 
-            {/* Control Buttons */}
-            <div className="flex gap-2 mt-4">
-              <button onClick={resetGame} className="win95-button font-vt323">
-                New Game
-              </button>
-              {isComplete && (
-                <button onClick={resetGame} className="win95-button font-vt323">
-                  Play Again
-                </button>
-              )}
-            </div>
+            <GameControls onReset={resetGame} isComplete={isComplete} />
           </div>
         </div>
 
-        {/* Right Side Panel - Settings and History */}
-        <div className="w-full lg:flex-1 lg:min-w-32 lg:max-w-80">
-          {/* Theme Selector */}
-          <div className="win95-raised p-3 mb-4">
-            <div className="win95-titlebar mb-2">
-              <span className="font-vt323 text-xs">Board Theme</span>
-            </div>
-            <div className="space-y-2">
-              {RETRO_BOARD_THEMES.map((theme) => (
-                <label
-                  key={theme.name}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    name="theme"
-                    checked={selectedTheme.name === theme.name}
-                    onChange={() => setSelectedTheme(theme)}
-                    className="win95-radio"
-                  />
-                  <span className="font-vt323 text-xs text-black">
-                    {theme.name}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Variations */}
-          <div className="win95-raised p-3 mb-4">
-            <div className="win95-titlebar mb-2">
-              <span className="font-vt323 text-xs">Practice Against</span>
-            </div>
-            <div className="space-y-2">
-              {availableVariations.map((variation) => (
-                <label
-                  key={variation.move}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedVariations.includes(variation.move)}
-                    onChange={() => handleVariationToggle(variation.move)}
-                    className="win95-checkbox"
-                  />
-                  <span className="font-vt323 text-xs text-black font-bold">
-                    {variation.move}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Move History */}
-          <div className="win95-raised p-3">
-            <div className="win95-titlebar mb-2">
-              <span className="font-vt323 text-xs">Move History</span>
-            </div>
-            <div className="win95-input p-2 h-24 overflow-y-auto">
-              <div className="font-vt323 text-xs text-black leading-tight">
-                {moveHistory.map((move, index) => {
-                  const moveNumber = Math.floor(index / 2) + 1;
-                  const isWhiteMove = index % 2 === 0;
-                  return (
-                    <span key={index}>
-                      {isWhiteMove && `${moveNumber}. `}
-                      {move}
-                      {!isWhiteMove && " "}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Right Side Panel */}
+        <SidePanel
+          selectedTheme={selectedTheme}
+          onThemeChange={setSelectedTheme}
+          availableVariations={availableVariations}
+          selectedVariations={selectedVariations}
+          onVariationToggle={handleVariationToggle}
+          moveHistory={moveHistory}
+        />
       </div>
     </div>
   );

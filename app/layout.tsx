@@ -20,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${vt323.variable} antialiased`}>{children}</body>
+      <body className={`${vt323.variable} antialiased font-vt323`}>
+        {children}
+      </body>
     </html>
   );
 }

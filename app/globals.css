@@ -146,7 +146,7 @@
 @layer components {
   /* Windows 95 Button Styles */
   .win95-button {
-    @apply bg-[#C3C3C3] text-black border-2 border-solid px-4 py-2 font-vt323 cursor-pointer;
+    @apply bg-[#C3C3C3] text-black border-2 border-solid px-4 py-2 cursor-pointer;
     border-color: #FFFFFF #808080 #808080 #FFFFFF;
     box-shadow: inset 1px 1px 0px #DFDFDF, inset -1px -1px 0px #808080;
   }
@@ -176,7 +176,7 @@
 
   /* Windows 95 Title Bar */
   .win95-titlebar {
-    @apply bg-[#008080] text-white border-2 border-solid px-2 py-1 font-vt323 text-sm;
+    @apply bg-[#008080] text-white border-2 border-solid px-2 py-1 text-sm;
     border-color: #FFFFFF #404040 #404040 #FFFFFF;
   }
 
@@ -189,7 +189,7 @@
 
   /* Windows 95 Input Field */
   .win95-input {
-    @apply bg-white text-black border-2 border-solid px-2 py-1 font-vt323;
+    @apply bg-white text-black border-2 border-solid px-2 py-1;
     border-color: #808080 #FFFFFF #FFFFFF #808080;
     box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);
   }
