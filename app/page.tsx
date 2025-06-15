@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import Image from "next/image";
 import ChessBoard from "../components/ChessBoard";
 import Win95Panel from "../components/ui/Win95Panel";
 import Win95Button from "../components/ui/Win95Button";
 import Win95Input from "../components/ui/Win95Input";
+import AboutModal from "../components/AboutModal";
+import DesktopIcon from "../components/DesktopIcon";
 import { OpeningNode } from "../types/opening";
 import { parseOpeningTree } from "../utils/opening-parser";
 import scotchGambitData from "../data/scotch-gambit.json";
@@ -15,19 +18,29 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isClosed, setIsClosed] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
+  const [isRelaunching, setIsRelaunching] = useState(false);
 
   // Load and parse opening tree on component mount
   useEffect(() => {
-    try {
-      const parsedTree = parseOpeningTree(scotchGambitData);
-      setOpeningTree(parsedTree);
-      setLoading(false);
-    } catch (err) {
-      setError("Failed to load opening data");
-      setLoading(false);
-      console.error("Error parsing opening tree:", err);
-    }
+    const loadData = async () => {
+      try {
+        const parsedTree = parseOpeningTree(scotchGambitData);
+        setOpeningTree(parsedTree);
+
+        // Ensure loading screen shows for at least 1 second
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to load opening data");
+        setLoading(false);
+        console.error("Error parsing opening tree:", err);
+      }
+    };
+
+    loadData();
   }, []);
 
   // Handle game state changes
@@ -43,7 +56,7 @@ export default function Home() {
     // This callback is available for future functionality if needed
   };
 
-  if (loading) {
+  if (loading || isRelaunching) {
     return (
       <div className="min-h-screen bg-[#C3C3C3] flex items-center justify-center">
         <div className="win95-window p-8">
@@ -53,8 +66,11 @@ export default function Home() {
           <div className="win95-panel p-6 text-center">
             <div className="bg-[#808080] h-4 w-64 mx-auto mb-4 win95-panel">
               <div
-                className="h-full bg-[#008080] animate-pulse"
-                style={{ width: "60%" }}
+                className="h-full animate-pulse"
+                style={{
+                  width: "60%",
+                  backgroundColor: "var(--color-primary)",
+                }}
               ></div>
             </div>
             <p className="text-black">Loading chess trainer components...</p>
@@ -83,9 +99,22 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#C3C3C3] p-2 relative overflow-hidden">
+    <div className="min-h-screen bg-[#C3C3C3] p-0 md:p-2 relative overflow-hidden">
+      {/* Background Image - only visible when minimized */}
+      <div
+        className="absolute inset-0 flex items-start justify-center pt-16"
+        style={{ zIndex: 1 }}
+      >
+        <div
+          className="w-90 h-90 md:w-160 md:h-160 bg-cover bg-center bg-no-repeat opacity-80"
+          style={{
+            backgroundImage: "url('/background.png')",
+            filter: "brightness(0.9) contrast(1.1)",
+          }}
+        />
+      </div>
       <AnimatePresence mode="wait">
-        {!isMinimized ? (
+        {!isMinimized && !isClosed ? (
           <motion.div
             key="window"
             className="win95-window h-full"
@@ -109,7 +138,9 @@ export default function Home() {
           >
             {/* Title Bar */}
             <div className="win95-titlebar flex justify-between items-center">
-              <span className="">Scotch Gambit Trainer v1.0</span>
+              <span className="text-md md:text-3xl">
+                Scotch Gambit Trainer v1.0
+              </span>
               <div className="flex gap-1">
                 <Win95Button
                   className="px-2 py-0 text-xs"
@@ -124,7 +155,12 @@ export default function Home() {
                   _
                 </Win95Button>
                 <Win95Button className="px-2 py-0 text-xs">□</Win95Button>
-                <Win95Button className="px-2 py-0 text-xs">×</Win95Button>
+                <Win95Button
+                  className="px-2 py-0 text-xs"
+                  onClick={() => setIsClosed(true)}
+                >
+                  ×
+                </Win95Button>
               </div>
             </div>
 
@@ -196,6 +232,20 @@ export default function Home() {
         ) : null}
       </AnimatePresence>
 
+      {/* Desktop Icon - only visible when window is closed */}
+      {isClosed && (
+        <DesktopIcon
+          onDoubleClick={async () => {
+            setIsRelaunching(true);
+            // Show loading screen for 1 second
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            setIsClosed(false);
+            setIsMinimized(false);
+            setIsRelaunching(false);
+          }}
+        />
+      )}
+
       {/* Minimized Taskbar */}
       <AnimatePresence>
         {isMinimized && (
@@ -216,8 +266,17 @@ export default function Home() {
             <div className="win95-panel p-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-[#008080] border border-[#404040] flex items-center justify-center">
-                    <div className="text-white text-xs">♔</div>
+                  <div
+                    className="w-4 h-4 border border-[#404040] flex items-center justify-center p-0.5"
+                    style={{ backgroundColor: "var(--color-primary)" }}
+                  >
+                    <Image
+                      src="/pieces/wq.svg"
+                      alt="Chess Queen"
+                      width={12}
+                      height={12}
+                      className="w-full h-full"
+                    />
                   </div>
                   <span className="text-sm">Scotch Gambit Trainer</span>
                 </div>
@@ -233,72 +292,11 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Contact Modal */}
-      {showContactModal && (
-        <div
-          className="fixed inset-0 flex items-center justify-center z-50"
-          onClick={() => setShowContactModal(false)}
-        >
-          <div
-            className="win95-window w-80 max-w-sm mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Title Bar */}
-            <div className="win95-titlebar flex justify-between items-center">
-              <span className="">About</span>
-              <Win95Button
-                className="px-2 py-0 text-xs"
-                onClick={() => setShowContactModal(false)}
-              >
-                ×
-              </Win95Button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-4">
-              <div className="win95-panel p-4">
-                <div className="text-center space-y-4">
-                  <div className="text-2xl">♔</div>
-                  <h3 className="text-black font-bold">
-                    Scotch Gambit Trainer
-                  </h3>
-                  <p className="text-sm text-black">Created by [Your Name]</p>
-
-                  <div className="space-y-2">
-                    <Win95Button
-                      className="w-full py-2"
-                      onClick={() =>
-                        window.open(
-                          "https://linkedin.com/in/your-profile",
-                          "_blank"
-                        )
-                      }
-                    >
-                      📧 LinkedIn
-                    </Win95Button>
-                    <Win95Button
-                      className="w-full py-2"
-                      onClick={() =>
-                        window.open("https://twitter.com/your-handle", "_blank")
-                      }
-                    >
-                      🐦 Twitter
-                    </Win95Button>
-                    <Win95Button
-                      className="w-full py-2"
-                      onClick={() =>
-                        window.open("mailto:your.email@example.com", "_blank")
-                      }
-                    >
-                      ✉️ Email
-                    </Win95Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* About Modal */}
+      <AboutModal
+        isOpen={showContactModal}
+        onClose={() => setShowContactModal(false)}
+      />
     </div>
   );
 }

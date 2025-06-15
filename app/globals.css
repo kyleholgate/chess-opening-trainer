@@ -17,6 +17,7 @@
   --color-win95-disabled-text: #808080;
   --color-win95-selected: #000080;
   --color-win95-selected-text: #FFFFFF;
+  --color-primary: #008080;
   
   /* Map to existing theme variables */
   --color-background: var(--color-win95-window-bg);
@@ -176,7 +177,8 @@
 
   /* Windows 95 Title Bar */
   .win95-titlebar {
-    @apply bg-[#008080] text-white border-2 border-solid px-2 py-1 text-sm;
+    @apply text-white border-2 border-solid px-2 py-1 text-sm;
+    background-color: var(--color-primary);
     border-color: #FFFFFF #404040 #404040 #FFFFFF;
   }
 

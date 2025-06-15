@@ -5,18 +5,18 @@ import { BoardTheme } from "./BoardDisplay";
 const RETRO_BOARD_THEMES: BoardTheme[] = [
   {
     name: "Classic Beige",
-    darkSquares: "#808080",
-    lightSquares: "#C3C3C3",
+    darkSquares: "#B6B09F",
+    lightSquares: "#F2F2F2",
   },
   {
-    name: "Teal Gray",
-    darkSquares: "#008080",
-    lightSquares: "#DFDFDF",
+    name: "Moonrise Kingdom",
+    darkSquares: "#c5512c",
+    lightSquares: "#e29b75",
   },
   {
-    name: "Monochrome",
-    darkSquares: "#404040",
-    lightSquares: "#FFFFFF",
+    name: "Grand Budapest",
+    darkSquares: "#784283",
+    lightSquares: "#ffa8cb",
   },
 ];
 
