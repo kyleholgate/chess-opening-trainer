@@ -16,18 +16,18 @@ interface BoardDisplayProps {
 }
 
 const pieces = [
-  "wP",
-  "wN",
-  "wB",
-  "wR",
-  "wQ",
-  "wK",
-  "bP",
-  "bN",
-  "bB",
-  "bR",
-  "bQ",
-  "bK",
+  "wp",
+  "wn",
+  "wb",
+  "wr",
+  "wq",
+  "wk",
+  "bp",
+  "bn",
+  "bb",
+  "br",
+  "bq",
+  "bk",
 ];
 
 export default function BoardDisplay({
