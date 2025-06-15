@@ -4,9 +4,11 @@ import { useState } from "react";
 import {
   BoardDisplay,
   SidePanel,
+  GameStatus,
   BoardTheme,
   RETRO_BOARD_THEMES,
 } from "./chessGame";
+import GameControls from "./chessGame/GameControls";
 import { OpeningNode } from "../types/opening";
 import { useChessGame } from "../hooks/useChessGame";
 
@@ -83,6 +85,13 @@ export default function ChessBoard({
           onPieceDrop={actions.onDrop}
           selectedTheme={selectedTheme}
           isPlayerTurn={gameState.isPlayerTurn}
+          isComplete={gameState.isComplete}
+        />
+        {/* Game Status */}
+        <GameStatus feedback={gameState.feedback} />
+        {/* Game Controls below the board */}
+        <GameControls
+          onReset={actions.resetGame}
           isComplete={gameState.isComplete}
         />
       </div>

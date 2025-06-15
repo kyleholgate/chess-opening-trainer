@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Chess } from "chess.js";
 import { OpeningNode } from "../types/opening";
 import { selectWeightedMove } from "../utils/weighted-selection";
@@ -271,7 +271,13 @@ export function useChessGame({
     setFeedback("Black to move. How will they respond to the Scotch Gambit?");
     setIsPlayerTurn(false); // Black moves first from this position
     setIsComplete(false);
-  }, [game, getStartingNode]);
+
+    // Trigger Black's first move after reset with a delay
+    setTimeout(() => {
+      const startingNode = getStartingNode();
+      makeOpponentMove(startingNode, [...SCOTCH_GAMBIT_MOVES]);
+    }, 1500);
+  }, [game, getStartingNode, makeOpponentMove]);
 
   // Handle variation selection toggle
   const handleVariationToggle = useCallback((move: string) => {
@@ -287,6 +293,24 @@ export function useChessGame({
       }
     });
   }, []);
+
+  // Auto-start the game by making Black's first move
+  useEffect(() => {
+    // Only make the initial move if we're at the starting position and it's Black's turn
+    if (moveHistory.length === 7 && !isPlayerTurn && !isComplete) {
+      const timer = setTimeout(() => {
+        makeOpponentMove(currentNode, moveHistory);
+      }, 1500); // Slightly longer delay for the initial move
+
+      return () => clearTimeout(timer);
+    }
+  }, [
+    moveHistory.length,
+    isPlayerTurn,
+    isComplete,
+    currentNode,
+    makeOpponentMove,
+  ]);
 
   // Combine state and actions
   const gameState: ChessGameState = {
