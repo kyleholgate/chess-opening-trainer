@@ -1,40 +1,76 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { OpeningNode } from "../types/opening";
 
 /**
+ * Opening Tree Parser
+ *
+ * Utilities for parsing and validating chess opening tree data.
+ * Following P4: Design Deep Modules - simple interface hiding complex validation logic.
+ * Following P10: Pull Complexity Downwards - handles all parsing complexity internally.
+ */
+
+/**
  * Loads and parses the opening tree from JSON data
- * @param jsonData - Raw JSON data
- * @returns Parsed opening tree
+ *
+ * @param jsonData - Raw JSON data from opening database
+ * @returns Validated and parsed opening tree
+ * @throws Error if data structure is invalid
+ *
+ * @example
+ * ```tsx
+ * const tree = parseOpeningTree(rawJsonData);
+ * ```
  */
 export function parseOpeningTree(jsonData: unknown): OpeningNode {
   if (!jsonData || typeof jsonData !== "object") {
-    throw new Error("Invalid opening tree data");
+    throw new Error("Invalid opening tree data: must be a valid object");
   }
 
   return validateOpeningNode(jsonData);
 }
 
 /**
+ * Checks if a move is valid from the current node
+ *
+ * @param node - Current position node
+ * @param move - Move to validate in SAN notation
+ * @returns True if the move exists in the opening tree
+ *
+ * @example
+ * ```tsx
+ * if (isValidMove(currentNode, "e4")) {
+ *   // Move is valid in opening theory
+ * }
+ * ```
+ */
+export function isValidMove(node: OpeningNode, move: string): boolean {
+  return move in node.children;
+}
+
+/**
  * Validates an opening node recursively
- * @param node - Node to validate
- * @returns Validated opening node
+ *
+ * @param node - Raw node data to validate
+ * @returns Validated opening node with proper typing
+ * @throws Error if node structure is invalid
+ *
+ * @internal - Used internally by parseOpeningTree
  */
 function validateOpeningNode(node: unknown): OpeningNode {
   if (!node || typeof node !== "object") {
-    throw new Error("Invalid opening node");
+    throw new Error("Invalid opening node: must be a valid object");
   }
 
-  // Type assertion after runtime check - we're validating unknown data
-  const nodeData = node as OpeningNode;
+  // Safe type assertion after runtime validation
+  const nodeData = node as Record<string, unknown>;
 
   const validated: OpeningNode = {
-    move: (nodeData.move as string) || null,
+    move: typeof nodeData.move === "string" ? nodeData.move : null,
     children: {},
   };
 
-  // Optional fields
-  if (nodeData.comment) {
-    validated.comment = String(nodeData.comment);
+  // Validate optional fields with proper type checking
+  if (typeof nodeData.comment === "string") {
+    validated.comment = nodeData.comment;
   }
 
   if (
@@ -51,9 +87,8 @@ function validateOpeningNode(node: unknown): OpeningNode {
 
   // Validate children recursively
   if (nodeData.children && typeof nodeData.children === "object") {
-    for (const [move, child] of Object.entries(
-      nodeData.children as Record<string, unknown>
-    )) {
+    const children = nodeData.children as Record<string, unknown>;
+    for (const [move, child] of Object.entries(children)) {
       if (typeof move === "string" && move.length > 0) {
         validated.children[move] = validateOpeningNode(child);
       }
@@ -61,89 +96,4 @@ function validateOpeningNode(node: unknown): OpeningNode {
   }
 
   return validated;
-}
-
-/**
- * Navigates to a specific node in the opening tree following a path of moves
- * @param root - Root node of the opening tree
- * @param moves - Array of moves in SAN notation
- * @returns The node at the end of the path, or null if path doesn't exist
- */
-export function navigateToNode(
-  root: OpeningNode,
-  moves: string[]
-): OpeningNode | null {
-  let currentNode = root;
-
-  for (const move of moves) {
-    if (!currentNode.children[move]) {
-      return null; // Path doesn't exist
-    }
-    currentNode = currentNode.children[move];
-  }
-
-  return currentNode;
-}
-
-/**
- * Gets all possible moves from a given node
- * @param node - Current node
- * @returns Array of possible moves in SAN notation
- */
-export function getPossibleMoves(node: OpeningNode): string[] {
-  return Object.keys(node.children);
-}
-
-/**
- * Checks if a move is valid from the current node
- * @param node - Current node
- * @param move - Move to check in SAN notation
- * @returns True if the move exists in the opening tree
- */
-export function isValidMove(node: OpeningNode, move: string): boolean {
-  return move in node.children;
-}
-
-/**
- * Gets the depth of the opening tree
- * @param node - Starting node
- * @returns Maximum depth from this node
- */
-export function getTreeDepth(node: OpeningNode): number {
-  if (Object.keys(node.children).length === 0) {
-    return 0;
-  }
-
-  let maxDepth = 0;
-  for (const child of Object.values(node.children)) {
-    const childDepth = getTreeDepth(child);
-    maxDepth = Math.max(maxDepth, childDepth + 1);
-  }
-
-  return maxDepth;
-}
-
-/**
- * Gets all terminal nodes (end of variations) from a starting node
- * @param node - Starting node
- * @param currentPath - Current path of moves
- * @returns Array of paths to terminal nodes
- */
-export function getTerminalPaths(
-  node: OpeningNode,
-  currentPath: string[] = []
-): string[][] {
-  const paths: string[][] = [];
-
-  if (node.isEndOfVariation || Object.keys(node.children).length === 0) {
-    paths.push([...currentPath]);
-    return paths;
-  }
-
-  for (const [move, child] of Object.entries(node.children)) {
-    const childPaths = getTerminalPaths(child, [...currentPath, move]);
-    paths.push(...childPaths);
-  }
-
-  return paths;
 }

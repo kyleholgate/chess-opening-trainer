@@ -1,118 +1,61 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import Image from "next/image";
 import ChessBoard from "../components/ChessBoard";
 import Win95Panel from "../components/ui/Win95Panel";
-import Win95Button from "../components/ui/Win95Button";
 import Win95Input from "../components/ui/Win95Input";
 import AboutModal from "../components/AboutModal";
 import DesktopIcon from "../components/DesktopIcon";
-import { OpeningNode } from "../types/opening";
-import { parseOpeningTree } from "../utils/opening-parser";
-import scotchGambitData from "../data/scotch-gambit.json";
+import LoadingScreen from "../components/screens/LoadingScreen";
+import ErrorScreen from "../components/screens/ErrorScreen";
+import WindowTitleBar from "../components/layout/WindowTitleBar";
+import BackgroundImage from "../components/layout/BackgroundImage";
+import TaskBar from "../components/layout/TaskBar";
+import { useApplicationState } from "../hooks/useApplicationState";
+import { WINDOW_TITLES, Z_INDEX, TIMING } from "../constants/ui";
 
+/**
+ * Home Component - Refactored following A Philosophy of Software Design principles
+ * Following P4: Design Deep Modules - delegates complexity to focused child components
+ * Following P2: Prioritize Design Quality - clean architecture over quick fixes
+ */
 export default function Home() {
-  const [openingTree, setOpeningTree] = useState<OpeningNode | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [isClosed, setIsClosed] = useState(false);
-  const [showContactModal, setShowContactModal] = useState(false);
-  const [isRelaunching, setIsRelaunching] = useState(false);
+  const {
+    openingTree,
+    isLoading,
+    error,
+    isMinimized,
+    isClosed,
+    showContactModal,
+    isRelaunching,
+    setIsMinimized,
+    setIsClosed,
+    setShowContactModal,
+    relaunchApplication,
+  } = useApplicationState();
 
-  // Load and parse opening tree on component mount
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const parsedTree = parseOpeningTree(scotchGambitData);
-        setOpeningTree(parsedTree);
-
-        // Ensure loading screen shows for at least 1 second
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to load opening data");
-        setLoading(false);
-        console.error("Error parsing opening tree:", err);
-      }
-    };
-
-    loadData();
-  }, []);
-
-  // Handle game state changes
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleGameStateChange = (_state: {
-    position: string;
-    moveHistory: string[];
-    currentNode: OpeningNode;
-    feedback: string;
-    isComplete: boolean;
-  }) => {
+  // Handle game state changes - simplified callback
+  // Following RULE 4: Minimize Cognitive Load - clear, simple interface
+  const handleGameStateChange = () => {
     // Game state changes are handled within the ChessBoard component
     // This callback is available for future functionality if needed
   };
 
-  if (loading || isRelaunching) {
-    return (
-      <div className="min-h-screen bg-[#C3C3C3] flex items-center justify-center">
-        <div className="win95-window p-8">
-          <div className="win95-titlebar mb-4">
-            <span className="">Scotch Gambit Trainer - Loading...</span>
-          </div>
-          <div className="win95-panel p-6 text-center">
-            <div className="bg-[#808080] h-4 w-64 mx-auto mb-4 win95-panel">
-              <div
-                className="h-full animate-pulse"
-                style={{
-                  width: "60%",
-                  backgroundColor: "var(--color-primary)",
-                }}
-              ></div>
-            </div>
-            <p className="text-black">Loading chess trainer components...</p>
-          </div>
-        </div>
-      </div>
-    );
+  // Early returns for different application states
+  // Following P14: Design for Readability - obvious state handling
+  if (isLoading || isRelaunching) {
+    return <LoadingScreen />;
   }
 
   if (error || !openingTree) {
-    return (
-      <div className="min-h-screen bg-[#C3C3C3] flex items-center justify-center">
-        <div className="win95-window p-8">
-          <div className="win95-titlebar mb-4">
-            <span className="">Scotch Gambit Trainer - Error</span>
-          </div>
-          <div className="win95-panel p-6 text-center">
-            <div className="text-4xl mb-4">⚠️</div>
-            <h1 className="text-xl text-black mb-4">System Error</h1>
-            <p className="text-black">{error}</p>
-            <Win95Button className="mt-4">OK</Win95Button>
-          </div>
-        </div>
-      </div>
-    );
+    return <ErrorScreen error={error || "Unknown error occurred"} />;
   }
 
   return (
-    <div className="min-h-screen bg-[#C3C3C3] p-0 md:p-2 relative overflow-hidden">
+    <div className="min-h-screen bg-background p-0 md:p-2 relative overflow-hidden">
       {/* Background Image - only visible when minimized */}
-      <div
-        className="absolute inset-0 flex items-start justify-center pt-16"
-        style={{ zIndex: 1 }}
-      >
-        <div
-          className="w-90 h-90 md:w-160 md:h-160 bg-cover bg-center bg-no-repeat opacity-80"
-          style={{
-            backgroundImage: "url('/background.png')",
-            filter: "brightness(0.9) contrast(1.1)",
-          }}
-        />
-      </div>
+      <BackgroundImage isVisible={isMinimized} />
+
       <AnimatePresence mode="wait">
         {!isMinimized && !isClosed ? (
           <motion.div
@@ -126,43 +69,23 @@ export default function Home() {
               y: 200,
               opacity: 0,
               transition: {
-                duration: 0.25,
+                duration: TIMING.WINDOW_CLOSE_ANIMATION / 1000,
                 ease: "easeIn",
               },
             }}
             style={{
               position: "relative",
-              zIndex: 10,
+              zIndex: Z_INDEX.WINDOW,
               transformOrigin: "bottom left",
             }}
           >
             {/* Title Bar */}
-            <div className="win95-titlebar flex justify-between items-center">
-              <span className="text-md md:text-3xl">
-                Scotch Gambit Trainer v1.0
-              </span>
-              <div className="flex gap-1">
-                <Win95Button
-                  className="px-2 py-0 text-xs"
-                  onClick={() => setShowContactModal(true)}
-                >
-                  ?
-                </Win95Button>
-                <Win95Button
-                  className="px-2 py-0 text-xs"
-                  onClick={() => setIsMinimized(true)}
-                >
-                  _
-                </Win95Button>
-                <Win95Button className="px-2 py-0 text-xs">□</Win95Button>
-                <Win95Button
-                  className="px-2 py-0 text-xs"
-                  onClick={() => setIsClosed(true)}
-                >
-                  ×
-                </Win95Button>
-              </div>
-            </div>
+            <WindowTitleBar
+              title={WINDOW_TITLES.MAIN}
+              onAbout={() => setShowContactModal(true)}
+              onMinimize={() => setIsMinimized(true)}
+              onClose={() => setIsClosed(true)}
+            />
 
             {/* Main Content Area */}
             <div className="p-4 flex-1 overflow-hidden">
@@ -233,63 +156,15 @@ export default function Home() {
       </AnimatePresence>
 
       {/* Desktop Icon - only visible when window is closed */}
-      {isClosed && (
-        <DesktopIcon
-          onDoubleClick={async () => {
-            setIsRelaunching(true);
-            // Show loading screen for 1 second
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            setIsClosed(false);
-            setIsMinimized(false);
-            setIsRelaunching(false);
-          }}
-        />
-      )}
+      {isClosed && <DesktopIcon onDoubleClick={relaunchApplication} />}
 
       {/* Minimized Taskbar */}
       <AnimatePresence>
-        {isMinimized && (
-          <motion.div
-            key="taskbar"
-            className="fixed bottom-2 left-2 right-2 z-50"
-            initial={{ y: 50, opacity: 0 }}
-            animate={{
-              y: 0,
-              opacity: 1,
-            }}
-            exit={{ y: 50, opacity: 0 }}
-            transition={{
-              duration: 0.15,
-              ease: "easeOut",
-            }}
-          >
-            <div className="win95-panel p-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-4 h-4 border border-[#404040] flex items-center justify-center p-0.5"
-                    style={{ backgroundColor: "var(--color-primary)" }}
-                  >
-                    <Image
-                      src="/pieces/wq.svg"
-                      alt="Chess Queen"
-                      width={12}
-                      height={12}
-                      className="w-full h-full"
-                    />
-                  </div>
-                  <span className="text-sm">Scotch Gambit Trainer</span>
-                </div>
-                <Win95Button
-                  className="px-3 py-1 text-xs"
-                  onClick={() => setIsMinimized(false)}
-                >
-                  Restore
-                </Win95Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
+        <TaskBar
+          isVisible={isMinimized}
+          applicationTitle="Scotch Gambit Trainer"
+          onRestore={() => setIsMinimized(false)}
+        />
       </AnimatePresence>
 
       {/* About Modal */}

@@ -1,0 +1,1208 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+### Synopsis of Chapter 2: The Nature of Complexity
+
+The chapter identifies three key **symptoms** of complexity:
+1.  **Change Amplification:** Simple changes require modifications in many places.
+2.  **Cognitive Load:** Developers need to know too much to complete a task.
+3.  **Unknown Unknowns:** It's not obvious what needs changing or what information is required, leading to unexpected bugs. (This is considered the worst symptom).
+
+These symptoms are caused by two fundamental factors:
+1.  **Dependencies:** Code cannot be understood or modified in isolation; it's linked to other code that also needs consideration or modification. While unavoidable, dependencies should be minimized and made obvious.
+2.  **Obscurity:** Important information is not obvious (e.g., poor naming, missing context, hidden relationships, inconsistency).
+
+Complexity accumulates incrementally through small dependencies and obscurities. A "zero tolerance" approach is necessary to prevent its growth, as it's hard to remove once established.
+
+Ultimately, high complexity makes software development difficult, risky, and costly. The goal is to design systems that are easy to understand and modify, thus minimizing complexity. Obviousness is the opposite of cognitive load and unknown unknowns and is a key design goal.
+
+---
+
+### Rules and Coding Principles from Chapter 2
+
+Here are the key principles and rules extracted from the chapter, suitable for guiding software design and implementation.
+
+**Core Goal & Definition:**
+
+*   **PRINCIPLE 1: Minimize Complexity**
+    *   **Description:** The primary objective is to design software systems that are easy for developers to understand and modify.
+    *   **Explanation:** Complexity is defined by the practical difficulty developers face when working on the code. It's not necessarily about the system's overall size or functionality, but its structure.
+    *   **LLM Guidance:** Prioritize code structures and patterns that improve understandability and facilitate future changes over those that optimize solely for initial writing speed, minimal lines of code, or perceived elegance by the author.
+
+**Understanding Complexity:**
+
+*   **PRINCIPLE 2: Recognize Complexity in Design**
+    *   **Description:** Develop the ability to identify design choices and code structures that lead to complexity *before* significant effort is invested.
+    *   **Explanation:** Being able to spot complex designs allows for trying simpler alternatives early in the process. Over time, this builds intuition for simpler techniques.
+    *   **LLM Guidance:** When evaluating alternative code generation approaches or design patterns, consider their potential impact on future understanding and modification. If a generated structure feels hard to parse or follow, flag it as potentially complex.
+
+*   **RULE 1: Design for the Reader, Not Just the Writer**
+    *   **Description:** Code simplicity should be judged by how easy it is for *other* developers (or future you) to understand and modify, not just the person writing it.
+    *   **Explanation:** If code seems simple to the author but complex to others, it *is* complex according to the book's definition.
+    *   **LLM Guidance:** Generate code that follows common conventions, uses clear naming, and explicit structures, even if a more "clever" or compact version is possible. Assume the code will be read and maintained by others.
+
+*   **RULE 2: Complexity is Weighted by Access Frequency**
+    *   **Description:** The overall impact of complexity is higher in parts of the system that are frequently understood or modified.
+    *   **Explanation:** Complex code that is rarely touched contributes less to overall system complexity than complex code that is constantly worked on.
+    *   **LLM Guidance:** While striving for simplicity everywhere, understand that complexity is most detrimental in core, frequently changed, or highly integrated parts of the system. Focus maximum simplification effort there. If unavoidable complexity exists, isolate it to seldom-modified areas.
+
+**Addressing Symptoms of Complexity:**
+
+*   **RULE 3: Minimize Change Amplification**
+    *   **Description:** Design the system such that a single logical change requires modifying the minimum number of physical locations in the code.
+    *   **Explanation:** Avoid scattering the representation of a single design decision across many files or functions.
+    *   **LLM Guidance:** Identify values or logic that represent a single concept (e.g., a UI color, a configuration setting, a business rule). Generate code that defines these concepts in one central place and references them elsewhere, rather than duplicating the value/logic.
+
+    *   **Example (Python - Bad - Change Amplification):**
+        ```python
+        # page1.py
+        def render_page1():
+            banner_color = "#FF0000" # Red
+            print(f"<div style='background-color: {banner_color}'>Page 1 Banner</div>")
+
+        # page2.py
+        def render_page2():
+            banner_color = "#FF0000" # Red
+            print(f"<div style='background-color: {banner_color}'>Page 2 Banner</div>")
+        ```
+        *To change banner color, modify both files.*
+
+    *   **Example (Python - Good - Reduced Change Amplification):**
+        ```python
+        # config.py
+        BANNER_COLOR = "#FF0000" # Red
+
+        # page1.py
+        from config import BANNER_COLOR
+        def render_page1():
+            print(f"<div style='background-color: {BANNER_COLOR}'>Page 1 Banner</div>")
+
+        # page2.py
+        from config import BANNER_COLOR
+        def render_page2():
+            print(f"<div style='background-color: {BANNER_COLOR}'>Page 2 Banner</div>")
+        ```
+        *To change banner color, modify only `config.py`.*
+
+*   **RULE 4: Minimize Cognitive Load**
+    *   **Description:** Design code components (functions, classes, modules, APIs) so that developers need to hold the minimum amount of information in their head to understand and use them correctly.
+    *   **Explanation:** Reduce the need to know intricate details, side effects, implicit assumptions, or consult extensive documentation just to use a piece of code.
+    *   **LLM Guidance:** Favor functions with clear inputs/outputs and minimal side effects. Avoid relying heavily on global variables or complex implicit state. Design APIs that are intuitive and consistent. Understand that sometimes slightly *more* code lines might be simpler if they reduce the mental burden (e.g., explicit variable names vs. highly compressed logic).
+
+    *   **Example (TypeScript - Bad - High Cognitive Load):**
+        ```typescript
+        // Assume this function implicitly relies on a global 'currentUser' variable,
+        // modifies a global 'appState' object, and returns a status code that
+        // requires looking up in a separate error code documentation.
+        let appState: any = {}; // Global state
+        let currentUser: string = ""; // Global user
+
+        function processUserData(data: string): number {
+            // ... complex logic interacting with appState and currentUser ...
+            console.log(`Processing data for ${currentUser}`);
+            appState.lastProcessed = Date.now();
+            // Returns an integer status code (e.g., 0 for success, 101 for auth error, 102 for validation error...)
+            if (data === "") {
+                return 102; // Requires knowledge of error codes
+            }
+            // ... more logic ...
+            return 0; // Requires knowledge of error codes
+        }
+
+        // Usage requires knowing about globals and consulting documentation for return codes.
+        currentUser = "alice";
+        const status = processUserData("some data");
+        if (status !== 0) {
+            console.error("Processing failed:", getErrorMessage(status)); // Need another function/lookup
+        }
+        ```
+
+    *   **Example (TypeScript - Good - Reduced Cognitive Load):**
+        ```typescript
+        interface ProcessingResult {
+            success: boolean;
+            error?: string; // Explicit error message
+        }
+
+        // Function takes explicit inputs and returns explicit result.
+        function processUserDataExplicit(currentUser: string, data: string): ProcessingResult {
+            // ... logic independent of global state ...
+            console.log(`Processing data for ${currentUser}`);
+            if (data === "") {
+                return { success: false, error: "Data cannot be empty" };
+            }
+            // ... more logic ...
+            return { success: true };
+        }
+
+        // Usage is clear and self-documenting.
+        const user = "bob"; // Explicit user
+        const result = processUserDataExplicit(user, "some data");
+        if (!result.success) {
+            console.error("Processing failed:", result.error);
+        }
+        // State management (like appState) is handled elsewhere explicitly.
+        ```
+
+*   **RULE 5: Design for Obviousness (Avoid Unknown Unknowns)**
+    *   **Description:** Make relationships, dependencies, and required information evident and easy to discover. The ideal system allows developers to make correct assumptions without extensive investigation.
+    *   **Explanation:** Prevent situations where modifying one part of the code requires knowledge of a non-obvious dependency elsewhere, leading to silent failures or bugs discovered late.
+    *   **LLM Guidance:** Use clear and descriptive names for variables, functions, and modules. Follow consistent patterns and conventions. Avoid implicit connections or side effects that aren't immediately clear from the code itself. If a dependency exists, try to make it explicit (e.g., via function arguments, clear module imports, consistent data structures).
+
+    *   **Example (Python - Bad - Unknown Unknown):**
+        ```python
+        # theme.py
+        HEADER_COLOR = "#FF5733" # Orange
+
+        # article.py
+        from theme import HEADER_COLOR
+        def render_article():
+            print(f"<header style='background-color: {HEADER_COLOR}'>Article Title</header>")
+            # ... other content ...
+            # EMPHASIS_COLOR is *implicitly* expected to be a darker shade of HEADER_COLOR
+            EMPHASIS_COLOR = "#C0392B" # Darker Orange (hardcoded, implicit relation)
+            print(f"<div style='color: {EMPHASIS_COLOR}'>Important Note</div>")
+        ```
+        *Changing `HEADER_COLOR` in `theme.py` doesn't automatically update `EMPHASIS_COLOR` in `article.py`. A developer changing `HEADER_COLOR` might not know `EMPHASIS_COLOR` needs updating, or where to find it.*
+
+    *   **Example (Python - Good - Obvious Dependency):**
+        ```python
+        # theme.py
+        HEADER_COLOR = "#FF5733" # Orange
+
+        def get_emphasis_color(base_color):
+            # Simple logic to derive emphasis color from base
+            # (In reality, might use a library or more complex calculation)
+            if base_color == "#FF5733": return "#C0392B"
+            # ... other color logic ...
+            return "#000000" # Default or error case
+
+        # article.py
+        from theme import HEADER_COLOR, get_emphasis_color
+        def render_article():
+            print(f"<header style='background-color: {HEADER_COLOR}'>Article Title</header>")
+            # ... other content ...
+            # EMPHASIS_COLOR is explicitly derived from HEADER_COLOR
+            emphasis_color = get_emphasis_color(HEADER_COLOR)
+            print(f"<div style='color: {emphasis_color}'>Important Note</div>")
+        ```
+        *Changing `HEADER_COLOR` now makes it obvious that `emphasis_color` is derived from it. The derivation logic is centralized or explicitly linked.*
+
+**Addressing Causes of Complexity:**
+
+*   **RULE 6: Minimize Dependencies**
+    *   **Description:** Reduce the number and strength of connections between different pieces of code where changing one requires changing the other.
+    *   **Explanation:** Less dependent code can be understood and modified in isolation more easily. While dependencies are necessary, aim for loose coupling.
+    *   **LLM Guidance:** Design modules, classes, and functions with well-defined, narrow interfaces. Avoid granting components access to more information or functionality than they strictly need. Pass required data explicitly rather than relying on shared mutable state.
+
+    *   **Example (TypeScript - Bad - Tight Dependency):**
+        ```typescript
+        // user-service.ts - tightly coupled to a specific database implementation
+        import { Database } from './specific-mongo-db'; // Direct import of concrete implementation
+
+        class UserService {
+            private db = new Database(); // Depends directly on Database class
+
+            async getUser(id: string): Promise<any> {
+                const userData = await this.db.findById(id);
+                return userData;
+            }
+            // ... other methods using this.db
+        }
+        ```
+        *Changing the database requires modifying `UserService`.*
+
+    *   **Example (TypeScript - Good - Reduced Dependency):**
+        ```typescript
+        // database-interface.ts - Define an interface
+        interface IDatabase {
+            findById(id: string): Promise<any>;
+            // ... other required methods
+        }
+
+        // user-service.ts - Depends only on the interface
+        class UserService {
+            private db: IDatabase; // Depends on the interface, not a concrete class
+
+            constructor(database: IDatabase) { // Dependency injected
+                this.db = database;
+            }
+
+            async getUser(id: string): Promise<any> {
+                const userData = await this.db.findById(id);
+                return userData;
+            }
+            // ... other methods using this.db
+        }
+
+        // In main application or composition root:
+        // import { Database } from './specific-mongo-db'; // Import concrete implementation here
+        // const myDatabase = new Database();
+        // const userService = new UserService(myDatabase); // Inject dependency
+        ```
+        *UserService depends only on the `IDatabase` interface. The specific database implementation can be changed or swapped without modifying `UserService` itself (as long as it implements `IDatabase`).*
+
+*   **RULE 7: Make Unavoidable Dependencies Obvious**
+    *   **Description:** When dependencies exist, ensure they are clear and easy for developers to discover (e.g., through explicit function signatures, well-defined APIs, clear naming, consistent structure).
+    *   **Explanation:** This mitigates the "unknown unknown" symptom arising from hidden dependencies. Compilers and static analysis tools can help enforce and make API dependencies obvious.
+    *   **LLM Guidance:** Use type hints, interface definitions, clear parameter names, and modular structures to explicitly show what a piece of code relies on. Generate code that favors compilation/linting errors for broken dependencies over runtime surprises.
+
+*   **RULE 8: Avoid Obscurity**
+    *   **Description:** Ensure all important information needed to understand and modify the code is readily apparent or easily discoverable.
+    *   **Explanation:** Combat poor naming, lack of context (e.g., missing units), implicit assumptions, and hidden connections.
+    *   **LLM Guidance:** Use descriptive variable and function names (e.g., `customerAgeInYears` instead of `x`, `processPayment` instead of `handle`). Follow consistent naming conventions. Add comments or documentation for non-obvious details (though simplifying the design to reduce the *need* for documentation is better - see next rule).
+
+*   **RULE 9: Simplify Design to Reduce Obscurity**
+    *   **Description:** The best way to reduce obscurity is often by simplifying the underlying system design, rather than solely relying on documentation.
+    *   **Explanation:** A clean, intuitive design requires less explanation. Extensive documentation can sometimes be a sign that the design itself is problematic.
+    *   **LLM Guidance:** When generating complex logic or structure, look for ways to break it down, introduce intermediate concepts with clear names, or use standard patterns that are widely understood.
+
+*   **RULE 10: Avoid Inconsistency**
+    *   **Description:** Use consistent naming, patterns, coding styles, and architectural approaches throughout the codebase.
+    *   **Explanation:** Inconsistency forces developers to constantly learn new rules and look up details, increasing cognitive load and contributing to obscurity.
+    *   **LLM Guidance:** Adhere strictly to established coding standards, naming conventions (e.g., `camelCase` for variables, `PascalCase` for classes in TS; `snake_case` in Python), and architectural patterns within a project. Do not invent new ways of doing things if a standard, consistent approach exists.
+
+**Managing Complexity Growth:**
+
+*   **RULE 11: Treat Complexity Incrementally ("Zero Tolerance")**
+    *   **Description:** Recognize that complexity accumulates from many small additions of dependencies and obscurities. Adopt a philosophy of actively avoiding adding *even small* amounts of complexity with each change.
+    *   **Explanation:** It's easy to justify a "small" bit of complexity for a quick fix, but this attitude leads to rapid overall degradation of the system's maintainability.
+    *   **LLM Guidance:** When proposing a code change or generating new code, evaluate whether it introduces *any* new, non-obvious dependencies or obscurities. Prefer solutions that simplify or keep complexity constant, even if slightly more effort is required upfront. Avoid quick fixes that add technical debt in the form of complexity.
+
+
+### Rules and Coding Principles from Chapter 4
+
+**Core Principles of Modular Design:**
+
+*   **PRINCIPLE 1: Decompose Systems into Independent Modules**
+    *   **Description:** Break down a large system into smaller, self-contained units (modules) that have minimal reliance on each other.
+    *   **Explanation:** This allows developers to focus on one part of the system at a time without needing to understand the entirety.
+    *   **LLM Guidance:** When generating code for a complex system or feature, suggest or create logical divisions into classes, functions, or packages/modules based on responsibility and potential for independent development/understanding.
+
+*   **PRINCIPLE 2: Separate Interface from Implementation**
+    *   **Description:** Clearly distinguish between how a module is used (its interface) and how it works internally (its implementation).
+    *   **Explanation:** The interface is the contract with the rest of the system; the implementation details should be hidden.
+    *   **LLM Guidance:** Use language features like access modifiers (`public`, `private`), interfaces (`interface` in TS, abstract base classes in Python), or package boundaries to enforce this separation. When describing a module, prioritize explaining *what* it does (interface) over *how* it does it (implementation details).
+
+*   **PRINCIPLE 3: Design Deep Modules**
+    *   **Description:** Strive to create modules that have simple, easy-to-understand interfaces but encapsulate significant, potentially complex functionality.
+    *   **Explanation:** Deep modules hide internal complexity effectively, providing high functionality benefit for a low interface cost (in terms of complexity imposed on users). This maximizes the complexity concealed.
+    *   **LLM Guidance:** When designing or suggesting module structures, evaluate the ratio of interface complexity to implementation complexity. Favor designs where a simple set of methods or functions provides access to sophisticated internal logic.
+
+    *   **Example (Conceptual - Deep Module):**
+        ```python
+        # A Database ORM (Object-Relational Mapper) module
+        # Interface is simple (e.g., save, find, delete methods)
+        # Implementation is complex (SQL generation, connection pooling, caching, transaction management)
+
+        # Example Usage (Simple Interface)
+        user = User(name="Alice", email="alice@example.com")
+        user_repository.save(user) # Simple call
+
+        # Hidden Complexity (Implementation details)
+        # Behind the scenes, 'save' involves:
+        # - Checking if user exists (SELECT)
+        # - Generating INSERT or UPDATE SQL
+        # - Managing database connection from a pool
+        # - Executing the SQL query
+        # - Handling potential errors/transactions
+        ```
+        *The user only needs to know `user_repository.save(user)`, not the intricate database interactions.*
+
+*   **PRINCIPLE 4: Use Abstractions Effectively**
+    *   **Description:** Create interfaces that provide simplified views of the underlying implementation by omitting unimportant details.
+    *   **Explanation:** Good abstractions reduce cognitive load by hiding irrelevant information.
+    *   **LLM Guidance:** Identify which details are essential for users of a module and which are internal implementation concerns. Design interfaces that only expose the essential details.
+
+**Rules for Designing Interfaces:**
+
+*   **RULE 1: Minimize Interface Complexity**
+    *   **Description:** Design module interfaces (formal and informal aspects) to be as small and simple as possible.
+    *   **Explanation:** A complex interface increases the cognitive load on developers using the module and creates more dependencies.
+    *   **LLM Guidance:** Favor fewer methods, simpler parameter lists, clear naming, and consistent behavior in module APIs. Be explicit about required usage constraints or side effects (informal interface).
+
+    *   **Example (TypeScript - Bad - Complex Interface/Informal):**
+        ```typescript
+        class DataProcessor {
+            // Requires calling init() first, but not enforced or obvious
+            // save() has side effects on the internal state which aren't clear
+            // process() only works on specific input string formats (e.g., CSV), but not documented
+            constructor(config: any) { /* ... */ }
+            init(connection: any): void { /* ... */ }
+            process(input: string): any { /* ... */ }
+            save(output: any): number { /* returns internal status code, lookup required */ }
+            getStatusMessage(statusCode: number): string { /* ... */ }
+        }
+        // Usage:
+        const processor = new DataProcessor({ /* ... */ });
+        // !! Developer must remember to call init !!
+        processor.init(dbConnection);
+        const result = processor.process("field1,field2\nvalue1,value2"); // Assumes CSV format
+        const status = processor.save(result);
+        const message = processor.getStatusMessage(status); // Requires knowing what status means
+        ```
+        *Multiple methods, required initialization call, implicit input format, opaque return value increase cognitive load and obscurity.*
+
+    *   **Example (TypeScript - Good - Simpler/More Obvious Interface):**
+        ```typescript
+        interface DataProcessorConfig { /* ... */ }
+        interface ProcessingResult { success: boolean; data?: any; error?: string; } // Explicit result
+
+        class DataProcessor {
+             // Constructor handles setup explicitly
+            constructor(config: DataProcessorConfig, connection: any) { /* ... init logic */ }
+
+            // Method name and signature make intent clear
+            // Returns explicit result object
+            processCsv(input: string): ProcessingResult {
+                // ... implementation for CSV ...
+                return { success: true, data: {} }; // Explicit success/data/error
+            }
+
+            // Separate method for saving, takes explicit data
+            async saveData(data: any): Promise<void> { /* ... */ }
+        }
+
+        // Usage:
+        const processor = new DataProcessor({ /* ... */ }, dbConnection); // Setup handled in constructor
+        const result = processor.processCsv("field1,field2\nvalue1,value2"); // Method name implies format
+        if (result.success) {
+            await processor.saveData(result.data);
+        } else {
+            console.error("Processing failed:", result.error); // Error is explicit
+        }
+        ```
+        *Fewer steps, clear method names, explicit data/error handling reduce cognitive load.*
+
+*   **RULE 2: Do Not Hide Important Details (Avoid False Abstractions)**
+    *   **Description:** While hiding implementation details is good, ensure that details *essential* for correct usage or understanding important behavior (like performance characteristics, necessary ordering of calls, resource management responsibilities) are exposed in the interface or documentation.
+    *   **Explanation:** Hiding important details leads to obscurity and "unknown unknowns," making the module hard to use correctly.
+    *   **LLM Guidance:** When designing an interface, consider what consequences misusing it might have. If there are crucial constraints (e.g., "this method is not thread-safe," "caller must dispose of the returned resource"), make them part of the informal interface (comments/docs) or formal interface (e.g., returning a type that implements `IDisposable`).
+
+*   **RULE 3: Prioritize Simple Interfaces for Common Use Cases**
+    *   **Description:** Design the module's interface so that the most frequent ways developers will use it are the simplest and most obvious.
+    *   **Explanation:** Complexity is weighted by frequency (Chapter 2). Making common tasks easy disproportionately reduces perceived system complexity. More complex, less frequent features can have slightly more complex interfaces, as long as they don't burden common usage.
+    *   **LLM Guidance:** Identify the primary use cases for a module. Ensure the API for these cases requires minimal setup, few parameters, and has clear, direct methods. Provide optional parameters, separate methods, or configuration for less common scenarios, without cluttering the main path. (Unix I/O sequential access example).
+
+**Anti-Patterns to Avoid:**
+
+*   **RULE 4: Avoid Shallow Modules**
+    *   **Description:** Do not create modules (classes, functions) where the interface complexity is comparable to or greater than the implementation complexity.
+    *   **Explanation:** Shallow modules don't effectively hide complexity; developers gain little by using them instead of directly implementing the logic themselves. They add interface overhead without sufficient functional benefit.
+    *   **LLM Guidance:** Before creating a new, small module, evaluate if the interface required to use it is significantly simpler than the few lines of logic it contains. If not, consider whether the logic could be better placed within an existing, deeper module or simply implemented inline where needed.
+
+    *   **Example (Python - Bad - Shallow Method):**
+        ```python
+        # Assumes 'config_data' is a dictionary accessible in the class/scope
+
+        # Method offers no abstraction over dictionary access
+        # Adds interface (method call) complexity without hiding any implementation complexity
+        def set_default_timeout(timeout_ms: int):
+            config_data['request_timeout'] = timeout_ms
+        ```
+        *Calling `set_default_timeout(5000)` is no simpler than `config_data['request_timeout'] = 5000`, and the method doesn't hide any complex logic.*
+
+    *   **Example (Python - Good - Potentially Deeper if Logic Added):**
+        ```python
+        # If setting the timeout involved validation, unit conversion,
+        # logging, or interacting with multiple internal config sources,
+        # it could justify a method interface:
+        def set_request_timeout(timeout_seconds: float):
+            if timeout_seconds < 0:
+                 raise ValueError("Timeout cannot be negative")
+            timeout_ms = int(timeout_seconds * 1000)
+            logging.info(f"Setting request timeout to {timeout_ms}ms")
+            self._internal_config_manager.update_setting('request_timeout_ms', timeout_ms)
+
+        ```
+        *This method now hides validation, conversion, logging, and interaction with an internal manager behind a simple interface `set_request_timeout(seconds)`. It is deeper.*
+
+*   **RULE 5: Avoid Classitis (Excessive Small, Shallow Modules)**
+    *   **Description:** Do not create an unnecessary proliferation of small classes or modules based on the misconception that "more classes = better design."
+    *   **Explanation:** While small classes can sometimes be appropriate, creating too many shallow classes results in high system-level complexity because developers must learn and manage a multitude of interfaces for limited functional gain.
+    *   **LLM Guidance:** Resist the urge to break down every piece of logic into its own class or method if that breakdown creates a new, complex interface for minimal hidden implementation. Look for opportunities to group related functionality behind a single, simple interface in a deeper module. (Java I/O streams example illustrates this).
+
+    *   **Example (Java - Classitis/Shallow Stream Wrapper Chain - As in book):**
+        ```java
+        // To read objects from a file:
+        FileInputStream fileStream = new FileInputStream(fileName); // Basic bytes
+        BufferedInputStream bufferedStream = new BufferedInputStream(fileStream); // Adds buffering
+        ObjectInputStream objectStream = new ObjectInputStream(bufferedStream); // Adds object reading
+
+        // The user must create and manage three objects/interfaces for a single logical task (reading objects)
+        // BufferedInputStream and FileInputStream are often shallow relative to the combined functionality
+        ```
+        *This requires understanding multiple separate classes (`FileInputStream`, `BufferedInputStream`, `ObjectInputStream`) and how to chain them, increasing cognitive load compared to a single "ObjectFileReader" concept.*
+
+
+### Rules and Coding Principles from Chapter 5
+
+**Core Principle:**
+
+*   **PRINCIPLE 1: Practice Information Hiding**
+    *   **Description:** Design modules (classes, functions, components) to encapsulate specific design decisions, data structures, algorithms, and internal logic, making these details inaccessible and irrelevant to users of the module via its interface.
+    *   **Explanation:** This is the fundamental technique for creating deep modules and managing complexity.
+    *   **LLM Guidance:** When generating code for a module, consciously decide which information is part of its public contract (interface) and which is internal detail (implementation). Use language features to enforce encapsulation.
+
+**Achieving Information Hiding & Avoiding Leakage:**
+
+*   **RULE 1: Encapsulate Design Decisions and Knowledge Within a Single Module**
+    *   **Description:** Identify specific pieces of knowledge or design decisions (e.g., a file format, how data is stored, a network protocol implementation). Ensure this knowledge resides in one module and is hidden from others.
+    *   **Explanation:** When the same knowledge is required in multiple places, it creates information leakage and dependencies.
+    *   **LLM Guidance:** When implementing a feature that involves a specific format, protocol, or complex algorithm, create a dedicated module (class/function/package) to handle that knowledge exclusively.
+
+    *   **Example (Python - Bad - Information Leakage):**
+        ```python
+        # reader.py
+        def read_config(file_path):
+            # Knows config file format (e.g., INI)
+            with open(file_path, 'r') as f:
+                lines = f.readlines()
+            config = {}
+            for line in lines: # Parse logic duplicates format knowledge
+                 if '=' in line:
+                     key, value = line.strip().split('=', 1)
+                     config[key] = value
+            return config
+
+        # writer.py
+        def write_config(file_path, config):
+            # Knows config file format (e.g., INI)
+            with open(file_path, 'w') as f:
+                for key, value in config.items(): # Formatting logic duplicates format knowledge
+                    f.write(f"{key}={value}\n")
+        ```
+        *Both `reader.py` and `writer.py` know the INI format (`key=value\n`). Changing the format requires changing both.*
+
+    *   **Example (Python - Good - Encapsulation/Information Hiding):**
+        ```python
+        # config_format_parser.py
+        class IniConfigParser:
+            def parse(self, lines):
+                 config = {}
+                 for line in lines: # Knows format details for reading
+                     if '=' in line:
+                         key, value = line.strip().split('=', 1)
+                         config[key] = value
+                 return config
+
+            def format(self, config):
+                lines = []
+                for key, value in config.items(): # Knows format details for writing
+                    lines.append(f"{key}={value}\n")
+                return lines
+
+        # config_manager.py - Uses the parser, doesn't know format details
+        from config_format_parser import IniConfigParser # Depends on the Parser module
+
+        class ConfigManager:
+            def __init__(self, parser):
+                 self.parser = parser # Depends on the parser interface
+
+            def load_config(self, file_path):
+                 with open(file_path, 'r') as f:
+                      lines = f.readlines()
+                 self.config = self.parser.parse(lines) # Uses parser, hides format detail
+
+            def save_config(self, file_path):
+                 lines = self.parser.format(self.config) # Uses parser, hides format detail
+                 with open(file_path, 'w') as f:
+                      f.writelines(lines)
+
+        # Usage:
+        # ini_parser = IniConfigParser()
+        # manager = ConfigManager(ini_parser) # Inject dependency
+        # manager.load_config("app.ini")
+        # manager.config['new_setting'] = 'value'
+        # manager.save_config("app.ini")
+        ```
+        *Only `IniConfigParser` knows the INI format. `ConfigManager` doesn't; it relies on the parser interface. Changing the format only requires changing `IniConfigParser`.*
+
+*   **RULE 2: Hide Implementation Details from the Module's Public Interface**
+    *   **Description:** Design module interfaces so they provide an abstract, simplified view of functionality, deliberately omitting internal details about *how* that functionality is achieved.
+    *   **Explanation:** The interface should describe *what* the module does, not expose its inner workings. This reduces cognitive load and dependencies on the implementation.
+    *   **LLM Guidance:** Define clear public methods and properties. Make internal data structures and helper methods `private` or package-private.
+
+*   **RULE 3: Avoid Leaking Information Through Public Methods**
+    *   **Description:** Be cautious about public methods (like getters) that return references to internal mutable data structures. Such methods effectively expose the module's internal state and representation, leading to information leakage.
+    *   **Explanation:** Even if the variable is `private`, if a public method allows external code to access or modify it directly, the implementation detail (the data structure) is leaked.
+    *   **LLM Guidance:** Prefer returning immutable copies of internal data or providing methods to query/modify the data indirectly through the module's controlled logic, rather than returning direct references to internal collections or objects.
+
+    *   **Example (TypeScript - Bad - Exposing Internal Representation):**
+        ```typescript
+        class UserPreferences {
+            private settings: Map<string, string>; // Internal representation
+
+            constructor() {
+                this.settings = new Map();
+            }
+
+            // Leaks the internal 'settings' Map
+            public getSettings(): Map<string, string> {
+                return this.settings; // Returning direct reference
+            }
+
+            // This method forces caller to know about the Map and how to use it
+            public getSetting(key: string): string | undefined {
+                 return this.settings.get(key); // Good, but the Map itself was leaked by getSettings
+            }
+        }
+        // Usage:
+        const prefs = new UserPreferences();
+        const allSettings = prefs.getSettings(); // Got the internal Map!
+        allSettings.set("theme", "dark"); // Directly modified internal state from outside!
+        // Or, could iterate over 'allSettings', relying on it being a Map
+        ```
+        *The caller now depends on the `settings` being a `Map`. Changing `settings` to a plain object or array internally would break callers.*
+
+    *   **Example (TypeScript - Good - Hiding Internal Representation):**
+        ```typescript
+        class UserPreferences {
+            private settings: Map<string, string>; // Can be changed internally
+
+            constructor() {
+                this.settings = new Map();
+            }
+
+            // Provides access to individual settings without exposing the internal structure
+            public getSetting(key: string): string | undefined {
+                return this.settings.get(key);
+            }
+
+            public setSetting(key: string, value: string): void {
+                this.settings.set(key, value);
+            }
+
+            // If needed, provide a method to get a *copy* of settings
+            public getAllSettings(): Map<string, string> {
+                return new Map(this.settings); // Return a copy, not the original
+            }
+        }
+        // Usage:
+        const prefs = new UserPreferences();
+        prefs.setSetting("theme", "dark"); // Use controlled method
+        const theme = prefs.getSetting("theme");
+
+        const allSettingsCopy = prefs.getAllSettings(); // Get a copy
+        // allSettingsCopy.set("theme", "light"); // Modifies only the copy, not internal state
+        ```
+        *The internal `settings` Map is hidden. Callers interact via explicit methods, reducing dependency on the internal data structure type.*
+
+*   **RULE 4: Value Partial Information Hiding**
+    *   **Description:** If a piece of information or a feature is only relevant to a subset of users or use cases, provide access to it through separate, less prominent parts of the interface, rather than cluttering the main, frequently used interface.
+    *   **Explanation:** This keeps the common case simple and reduces cognitive load for most users, even if the information isn't *totally* hidden.
+    *   **LLM Guidance:** Design APIs with clear separation between common methods and less common or advanced methods. Use method overloading, optional parameters (if not excessive), or separate configuration objects for advanced features.
+
+*   **RULE 5: Identify and Eliminate Information Leakage (Red Flag)**
+    *   **Description:** Be highly sensitive to situations where knowledge about a single design decision is spread across multiple parts of the code. Actively refactor to consolidate this knowledge.
+    *   **Explanation:** Information leakage is a major indicator of poor design that will cause maintenance problems.
+    *   **LLM Guidance:** When encountering code that duplicates parsing logic, format handling, configuration assumptions, etc., identify the shared knowledge and refactor to encapsulate it in a single module. This might involve merging existing classes or creating a new one.
+
+*   **RULE 6: Group Code by Shared Knowledge, Not Execution Order**
+    *   **Description:** Design modules by identifying related pieces of knowledge and grouping the code that relies on that knowledge into a single module, regardless of when that code executes.
+    *   **Explanation:** Avoid structuring modules based purely on the temporal sequence of operations (e.g., a 'Reader' class, then a 'Processor' class, then a 'Writer' class for a file format). Temporal decomposition often leads to information leakage.
+    *   **LLM Guidance:** When breaking down a process, think about the *data* and *concepts* involved (e.g., "handling the HTTP request format", "managing user data") rather than the steps ("reading", "parsing", "processing", "saving"). Create modules around these concepts. (HTTP Request reading/parsing example in synopsis).
+
+*   **RULE 7: "Do The Right Thing" By Default**
+    *   **Description:** Design interfaces so that modules automatically handle common or universally desired behaviors (like buffering I/O, setting standard headers) without requiring explicit instruction from the caller.
+    *   **Explanation:** This reduces the burden on the developer using the module and hides details that aren't necessary for the common case. It's a form of partial information hiding.
+    *   **LLM Guidance:** When designing APIs, identify common configuration or setup steps that most users will want. Provide these automatically or make them the default, exposing ways to customize only when necessary. (HTTP defaults example in synopsis).
+
+*   **RULE 8: Avoid Overexposing Users to Rare Features (Red Flag)**
+    *   **Description:** Do not force users of a commonly used feature to learn about or interact with parts of the API related to rarely used features.
+    *   **Explanation:** This increases cognitive load unnecessarily.
+    *   **LLM Guidance:** Ensure the primary methods/constructors for a module focus on the common use case. Use separate methods, advanced configuration objects, or builders for less frequent needs.
+
+*   **RULE 9: Apply Information Hiding Principles Within a Module**
+    *   **Description:** Extend the principles of information hiding to the internal structure of a module, designing private methods and managing instance variables to minimize dependencies and visibility within the class itself.
+    *   **Explanation:** This reduces internal complexity. Minimize the number of places an instance variable is accessed.
+    *   **LLM Guidance:** When generating complex class implementations, break down internal logic into private helper methods that encapsulate specific steps or knowledge. Limit the scope and usage of instance variables where possible.
+
+*   **RULE 10: Do Not Hide Information Required by Users**
+    *   **Description:** If information is genuinely needed by a module's users to make correct decisions or achieve necessary behavior (e.g., performance-critical configuration parameters for different use cases), that information *must* be exposed in the interface.
+    *   **Explanation:** Hiding truly necessary information creates a "false abstraction" (Chapter 4) and leads to obscurity and bugs.
+    *   **LLM Guidance:** Carefully consider the requirements of potential users. If a detail *must* influence how the user interacts with the module or how they configure their system using the module, expose it. However, simultaneously strive to minimize the amount of information users *need* to know by making the module smarter where possible (e.g., auto-tuning instead of exposing parameters).
+
+    Okay, here is a synopsis of Chapter 6, "General-Purpose Modules are Deeper," broken down into core concepts, principles, and actionable rules derived from the text, formatted for clarity for an LLM and including code examples where appropriate.
+
+---
+
+### Rules and Coding Principles from Chapter 6
+
+Here are the key principles and rules extracted from the chapter, suitable for guiding software design and implementation.
+
+**Core Principle:**
+
+*   **PRINCIPLE 1: Design Modules to Be "Somewhat General-Purpose"**
+    *   **Description:** Implement module functionality to meet current needs, but design the module's *interface* to be general enough to support multiple potential uses, without being tied specifically to the details of the *current* use case.
+    *   **Explanation:** This approach leads to simpler, deeper interfaces and better information hiding compared to purely special-purpose designs.
+    *   **LLM Guidance:** When generating a class or module, identify the core, fundamental operations it provides. Define the public API in terms of these fundamental operations, not in terms of the specific, high-level tasks the *current* caller wants to perform using the module.
+
+**Benefits and Rationale:**
+
+*   **RULE 1: General-Purpose Interfaces Lead to Deeper Modules**
+    *   **Description:** Interfaces defined with general-purpose methods tend to be simpler (fewer methods) and deeper (each method potentially covers more ground or hides more complex internal logic applicable to various situations).
+    *   **Explanation:** Replacing multiple special-purpose methods (like `backspace`, `deleteForward`, `deleteSelection`) with one or two general ones (`delete(range)`) reduces interface complexity and increases the conceptual power-to-weight ratio of the interface.
+    *   **LLM Guidance:** Evaluate if multiple proposed methods perform variations of the same fundamental operation. If so, try to consolidate them into a single, more general method with parameters to handle the variations, provided the resulting method signature remains simple.
+
+*   **RULE 2: General-Purpose Interfaces Improve Information Hiding**
+    *   **Description:** Defining interfaces in terms of the module's core concepts, rather than the caller's specific context, prevents details from the calling context from leaking into the module.
+    *   **Explanation:** Special-purpose interfaces often incorporate abstractions or details specific to the caller (e.g., UI concepts like 'Cursor' or 'Selection' leaking into a text data class), creating unwanted dependencies and reducing separation.
+    *   **LLM Guidance:** Ensure the names, parameters, and return types in a module's public API refer to concepts intrinsic to the module's responsibility, not concepts specific to a particular consumer of that module.
+
+*   **RULE 3: General-Purpose Interfaces Reduce Cognitive Load**
+    *   **Description:** A smaller set of versatile, general-purpose methods is easier for users of the module to learn and remember than a large set of single-purpose methods.
+    *   **Explanation:** Developers only need to understand a few core methods and can apply them in various situations.
+    *   **LLM Guidance:** Aim for APIs with a minimal set of orthogonal, powerful methods.
+
+**Implementation Guidance & Examples:**
+
+*   **RULE 4: Define Interfaces Using Fundamental Operations, Not Caller-Specific Actions**
+    *   **Description:** Base the module's API on the essential, underlying actions the module can perform, not the specific high-level features the current user interface or calling code exposes.
+    *   **Explanation:** The text editor example shows the contrast between `backspace()` (caller-specific action) and `delete(start, end)` (fundamental operation).
+    *   **LLM Guidance:** Analyze the core capability (e.g., modifying text, accessing data, performing a calculation). Design methods that manipulate the core elements directly in a versatile way.
+
+    *   **Example (Python - Bad - Special-Purpose Interface):**
+        ```python
+        # Special-purpose: Methods tied to specific UI actions
+        class TextDocument:
+            def __init__(self, initial_text=""):
+                self._lines = initial_text.splitlines()
+                # Assume some internal cursor/selection representation tied to UI
+
+            def handle_backspace_key(self, ui_cursor):
+                # Complex logic tied to the specific 'backspace' meaning
+                # Leaks UI concept 'ui_cursor'
+                print(f"Handling backspace at {ui_cursor}...")
+                # ... modify self._lines based on backspace logic ...
+
+            def handle_delete_key(self, ui_cursor):
+                # Complex logic tied to the specific 'delete' meaning
+                print(f"Handling delete key at {ui_cursor}...")
+                # ... modify self._lines based on delete logic ...
+
+            def delete_selected_text(self, ui_selection):
+                # Complex logic tied to UI selection concept
+                print(f"Deleting selection {ui_selection}...")
+                # ... modify self._lines based on selection range ...
+        ```
+        *Interface is complex (many methods), leaks UI concepts (`ui_cursor`, `ui_selection`, key names), and methods are shallow relative to a general delete.*
+
+    *   **Example (Python - Good - Somewhat General-Purpose Interface):**
+        ```python
+        # General-purpose: Methods for fundamental text operations
+        class TextBuffer:
+            def __init__(self, initial_text=""):
+                self._text = list(initial_text) # Internal representation (could be rope, etc.)
+
+            # Position type defined internally or standard primitive
+            Position = int # Example: Simple integer index position
+
+            def insert(self, position: Position, text_to_insert: str):
+                """Inserts text at the given position."""
+                print(f"Inserting '{text_to_insert}' at {position}")
+                self._text[position:position] = list(text_to_insert)
+
+            def delete(self, start: Position, end: Position):
+                """Deletes text between start (inclusive) and end (exclusive)."""
+                print(f"Deleting from {start} to {end}")
+                del self._text[start:end]
+
+            def get_text(self, start: Position, end: Position) -> str:
+                 """Gets text in the specified range."""
+                 return "".join(self._text[start:end])
+
+            # Maybe a helper for position arithmetic, independent of UI cursor
+            def calculate_position(self, start_pos: Position, offset: int) -> Position:
+                 # Logic to calculate new position, handling bounds
+                 new_pos = max(0, min(len(self._text), start_pos + offset))
+                 return new_pos
+
+        # --- Calling Code (e.g., in UI Layer) ---
+        buffer = TextBuffer("Hello World")
+        cursor_pos = 5 # UI layer manages its cursor position
+
+        # Implementing Backspace using the general API
+        print("\nSimulating Backspace:")
+        start_delete = buffer.calculate_position(cursor_pos, -1)
+        buffer.delete(start_delete, cursor_pos)
+        print(f"Buffer after backspace: '{''.join(buffer._text)}'") # Output: 'Hell World'
+
+        # Implementing Delete key using the general API
+        print("\nSimulating Delete Key:")
+        cursor_pos = 4 # Reset cursor for example
+        end_delete = buffer.calculate_position(cursor_pos, 1)
+        buffer.delete(cursor_pos, end_delete)
+        print(f"Buffer after delete: '{''.join(buffer._text)}'") # Output: 'HellWorld'
+
+        # Implementing Delete Selection using the general API
+        print("\nSimulating Delete Selection:")
+        selection_start = 0
+        selection_end = 4
+        buffer.delete(selection_start, selection_end)
+        print(f"Buffer after selection delete: '{''.join(buffer._text)}'") # Output: 'World'
+        ```
+        *Interface is simpler (fewer core methods). Uses fundamental concepts (`Position`, ranges). No UI concepts leaked. UI code is slightly longer per action but clear and uses the versatile API.*
+
+*   **RULE 5: Accept Slightly More Caller Code for Simpler Interfaces and Obviousness**
+    *   **Description:** It's acceptable, and often preferable, for the calling code to be slightly longer or perform simple compositions of general methods if it results in a significantly simpler, deeper, and more decoupled underlying module interface.
+    *   **Explanation:** The goal is overall system simplicity. Pushing minor composition logic into the caller can make the caller's intent more explicit and keep the underlying module cleaner and more reusable. Avoid pushing *complex* logic needed by many callers into the caller, however.
+    *   **LLM Guidance:** When choosing between a specialized method in a module and composing general methods in the caller, prefer composition in the caller if the composition logic is simple, specific to that caller's context, and doing so keeps the module's interface simpler and more general.
+
+**Heuristics for Finding the Balance:**
+
+*   **RULE 6: Ask: What is the simplest interface covering current needs?**
+    *   **Description:** Actively try to minimize the number of methods in an API while ensuring all necessary functionality can still be achieved easily.
+    *   **Explanation:** Fewer methods often imply more general methods. Check if multiple methods can be replaced by one, possibly with parameters. Ensure the parameters don't make the method overly complex.
+    *   **LLM Guidance:** Analyze the proposed API methods. Look for overlap or variations on a theme. Attempt to consolidate into fewer, more fundamental methods.
+
+*   **RULE 7: Ask: How many situations will use this method?**
+    *   **Description:** If a proposed method seems designed for only one specific call site or user action, it's a red flag that it might be too special-purpose.
+    *   **Explanation:** General-purpose methods tend to be applicable in multiple contexts.
+    *   **LLM Guidance:** Flag methods that appear highly specific to a single point of use. Suggest investigating if a more general method could serve this purpose and potentially others.
+
+*   **RULE 8: Ask: Is this API easy to use for my current needs?**
+    *   **Description:** Avoid making an interface *so* general or low-level that it becomes cumbersome or inefficient for the primary, intended use cases.
+    *   **Explanation:** This is the check against over-generalization. If callers constantly need complex loops or significant boilerplate code to perform common tasks using the "general" API, it may be too low-level.
+    *   **LLM Guidance:** Evaluate the effort required by the caller to perform common tasks using the proposed API. If common tasks require complex choreography of low-level methods, consider if slightly higher-level (but still general) methods are needed (e.g., supporting range operations vs. only single-character operations in the text example).
+
+
+### Synopsis of Chapter 7: Different Layer, Different Abstraction
+
+When adjacent layers have *similar* abstractions, it signals a design problem, often manifesting as:
+
+1.  **Pass-Through Methods:** Methods in a higher layer that do little more than invoke methods with identical or very similar signatures in a lower layer. These make the higher-level class shallower (increasing interface complexity without adding functionality), create dependencies, and indicate confused responsibilities. Solutions involve refactoring: exposing the lower layer directly, redistributing responsibilities, or merging the classes.
+2.  **Misused Decorators:** While intended to extend functionality, the decorator pattern can easily lead to shallow classes with many pass-through methods and duplicated APIs, especially if overused for minor features (like Java I/O streams). Alternatives like adding functionality to the base class, merging with the use case, merging decorators, or creating independent classes should be considered.
+3.  **Interface Mimicking Implementation:** When a class's public interface closely mirrors its internal data representation (e.g., a line-oriented API for text stored internally as lines), it often leads to a shallow class and pushes complexity onto the callers. A good interface provides a different, more useful abstraction than the raw implementation details (e.g., a character/range-based API for text).
+4.  **Pass-Through Variables:** Variables passed down through long chains of methods, burdening intermediate methods that don't use them. This increases coupling and makes adding new system-wide information difficult. Solutions include using shared objects (risky), global variables (usually bad), or the preferred approach: a **Context Object**. A Context Object bundles global state (config, shared services, counters) and is passed (often via constructors) to major objects, making global state explicit and manageable.
+
+The overarching theme is that every design element (class, interface, method, variable) adds complexity. To be justified, it must eliminate *more* complexity than it introduces, typically by providing significant new functionality or hiding implementation details effectively. Layers or methods with duplicated abstractions often fail this test.
+
+**Core Principles:**
+
+*   **PRINCIPLE 1: Ensure Adjacent Layers Offer Different Abstractions**
+    *   **Description:** When designing layered systems, each layer should provide a fundamentally different view or set of capabilities compared to the layers directly interacting with it.
+    *   **Explanation:** This maximizes the value of layering by ensuring each layer simplifies or transforms the concepts from the layer below, effectively managing complexity. Similarity suggests redundancy or poor decomposition.
+    *   **LLM Guidance:** When defining layers (e.g., UI, Business Logic, Data Access), verify that the concepts and operations exposed by each layer are distinct. The business logic layer should operate on domain concepts, not raw database rows; the UI layer should operate on presentation models, not directly on business entities if transformation is needed.
+
+*   **PRINCIPLE 2: Justify Complexity with Benefit**
+    *   **Description:** Every interface, class, method, or variable added to a system introduces complexity (learning cost, maintenance). Ensure each element provides more value (hiding complexity, adding significant functionality) than the cost it imposes.
+    *   **Explanation:** This is a general design heuristic. Elements that duplicate effort or add structure without significant benefit (like pass-through methods or shallow wrappers) violate this principle.
+    *   **LLM Guidance:** Before generating a new class, wrapper, or method, evaluate: Does this significantly simplify the caller's logic? Does it hide substantial implementation details? Does it enable significant reuse? If not, reconsider its necessity.
+
+**Rules for Identifying and Fixing Problematic Abstractions:**
+
+*   **RULE 1: Avoid Pass-Through Methods (Red Flag)**
+    *   **Description:** Do not create methods whose primary function is to simply call another method with an identical or very similar signature, passing arguments through without adding significant value.
+    *   **Explanation:** Pass-through methods increase interface surface area without adding functionality, make classes shallower, create unnecessary dependencies, and indicate unclear responsibilities.
+    *   **LLM Guidance:** Identify methods that mostly delegate to another method with a similar signature. Flag these as potential pass-through methods and suggest refactoring (see Rule 2).
+
+    *   **Example (TypeScript - Bad - Pass-Through Method):**
+        ```typescript
+        class LowLevelDataStore {
+            getItem(id: string): string | null {
+                console.log(`LowLevel: Getting item ${id}`);
+                // ... actual data retrieval logic ...
+                return id === "1" ? "Data" : null;
+            }
+        }
+
+        class HighLevelService {
+            private dataStore = new LowLevelDataStore();
+
+            // Pass-through method: Adds no value, just calls dataStore.getItem
+            public getItemData(id: string): string | null {
+                 // Only duplicates the interface of LowLevelDataStore
+                 return this.dataStore.getItem(id);
+            }
+        }
+
+        // Usage:
+        const service = new HighLevelService();
+        const data = service.getItemData("1"); // Calls service, which calls dataStore
+        ```
+
+*   **RULE 2: Refactor to Eliminate Pass-Through Methods**
+    *   **Description:** When pass-through methods are identified, refactor the code by reconsidering the division of responsibilities.
+    *   **Explanation:** Options include:
+        1.  **Expose Lower Layer:** Allow callers of the higher layer to directly access the lower layer object if appropriate.
+        2.  **Redistribute Responsibilities:** Move the relevant functionality entirely into one class or the other so the pass-through is unnecessary.
+        3.  **Merge Classes:** If the responsibilities are too intertwined, combine the classes.
+    *   **LLM Guidance:** Analyze the context of the pass-through. If the higher layer adds *no* abstraction or logic around the lower layer's functionality, suggest exposing the lower layer (e.g., `service.getDataStore().getItem(id)` or via dependency injection). If the higher layer *should* own the logic, move the implementation there. If inseparable, suggest merging.
+
+    *   **Example (TypeScript - Refactored - Option 1: Expose Lower Layer):**
+        ```typescript
+        class LowLevelDataStore {
+            getItem(id: string): string | null { /* ... as before ... */ }
+        }
+
+        class HighLevelService {
+            private store = new LowLevelDataStore();
+
+            // Expose the dependency (could be via getter or constructor injection)
+            public getDataStore(): LowLevelDataStore {
+                 return this.store;
+            }
+
+            // Other methods specific to HighLevelService might exist here...
+        }
+
+        // Usage: Caller gets the lower layer and uses it directly
+        const service = new HighLevelService();
+        const store = service.getDataStore();
+        const data = store.getItem("1");
+        ```
+        *(Alternative refactoring could involve moving the logic entirely to `HighLevelService` or merging).*
+
+*   **RULE 3: Methods with Similar Signatures Must Offer Distinct Value**
+    *   **Description:** It's acceptable for multiple methods (often in different classes within the same layer, or implementing the same interface) to have similar or identical signatures *if* each provides genuinely different and useful functionality.
+    *   **Explanation:** Examples include dispatchers (which select *which* implementation to call) or multiple implementations of an interface (e.g., different database drivers). Pass-through methods fail this test because they offer no distinct value.
+    *   **LLM Guidance:** When encountering methods with identical signatures, check if they represent different implementations of a common role (good) or if one is simply delegating without adding value (pass-through, bad).
+
+*   **RULE 4: Scrutinize the Decorator Pattern**
+    *   **Description:** Be cautious when applying the Decorator pattern. Ensure the wrapper class adds significant value and isn't just creating boilerplate and pass-through methods for a minor feature.
+    *   **Explanation:** Decorators can lead to class explosion and shallow modules. Often, merging the functionality into the base class, into the specific use case, into another decorator, or implementing it independently is a better, deeper design.
+    *   **LLM Guidance:** Before generating a decorator class, evaluate alternatives. Is the added feature core to the base concept? Is it used almost everywhere the base is used? If so, suggest merging into the base class. Is it highly specialized? Suggest merging into the client or implementing it separately.
+
+*   **RULE 5: Ensure Interface Abstraction Differs from Implementation Details**
+    *   **Description:** The public interface of a class should present a conceptual model that is different from, and usually simpler or more abstract than, its internal data structures and algorithms.
+    *   **Explanation:** If the interface closely matches the implementation details (e.g., exposing methods that directly manipulate internal lines of text when the abstraction should be character-based), the class is likely shallow and pushes complexity onto callers.
+    *   **LLM Guidance:** Analyze the proposed interface methods and compare them to the likely internal implementation. If they are too similar (e.g., `getLine(n)`, `setLine(n)` when the internal storage is lines), suggest designing an interface based on the logical operations users need (e.g., `insertText(pos, text)`, `deleteRange(start, end)`), hiding the line-based management.
+
+*   **RULE 6: Avoid Pass-Through Variables**
+    *   **Description:** Do not pass variables through intermediate methods that don't use them, just to get the variable to a lower-level method.
+    *   **Explanation:** This adds clutter and coupling to intermediate method signatures and makes adding new global/contextual information painful.
+    *   **LLM Guidance:** Detect parameters in method signatures that are passed down multiple levels without being used locally. Flag these as pass-through variables.
+
+*   **RULE 7: Use Context Objects for Global Information (Instead of Pass-Through or Globals)**
+    *   **Description:** Consolidate application-wide state (configuration, shared resources, counters, etc.) into a 'Context' object. Pass this context object (often via constructors) to major components that need access to this state.
+    *   **Explanation:** This avoids pass-through variables and the pitfalls of true global variables, provides a clear location for global state, aids testability, and simplifies adding new global state. Requires discipline to keep the context organized.
+    *   **LLM Guidance:** When identifying the need for configuration or shared state across multiple distant components, suggest creating a `Context` class. Store the necessary information in this class. Pass an instance of the `Context` during object construction to the objects that need it. Methods within those objects can then access the context via an instance variable (`this.context`).
+
+    *   **Example (Python - Bad - Pass-Through Variable):**
+        ```python
+        def process_level_3(data, user_auth_token): # Needs token
+            print(f"Level 3 processing data, using token: {user_auth_token}")
+            # ... use token ...
+
+        def process_level_2(data, user_auth_token): # Doesn't need token, just passes it
+             print("Level 2 preparing data...")
+             process_level_3(data, user_auth_token) # Passes token down
+
+        def process_level_1(data, user_auth_token): # Doesn't need token, just passes it
+             print("Level 1 validating data...")
+             process_level_2(data, user_auth_token) # Passes token down
+
+        # --- Main ---
+        token = "SECRET123"
+        process_level_1("raw_data", token) # Initial call requires passing token
+        ```
+
+    *   **Example (Python - Good - Using Context Object):**
+        ```python
+        class AppContext:
+            def __init__(self, auth_token: str, config_setting: str):
+                self.auth_token = auth_token # Immutable preferred
+                self.config_setting = config_setting # Other global info
+
+        class ProcessorLevel3:
+             def __init__(self, context: AppContext):
+                 self.context = context # Stores context
+
+             def process(self, data): # Method signature is cleaner
+                 print(f"Level 3 processing data, using token: {self.context.auth_token}")
+                 # ... use self.context.auth_token ...
+                 print(f"Level 3 using config: {self.context.config_setting}")
+
+        class ProcessorLevel2:
+            def __init__(self, context: AppContext):
+                self.context = context
+                self.level3 = ProcessorLevel3(context) # Pass context down during construction
+
+            def process(self, data): # Method signature is cleaner
+                print("Level 2 preparing data...")
+                self.level3.process(data) # Doesn't need token explicitly
+
+        class ProcessorLevel1:
+            def __init__(self, context: AppContext):
+                self.context = context
+                self.level2 = ProcessorLevel2(context) # Pass context down during construction
+
+            def process(self, data): # Method signature is cleaner
+                print("Level 1 validating data...")
+                self.level2.process(data)
+
+        # --- Main ---
+        app_context = AppContext(auth_token="SECRET123", config_setting="prod")
+        level1_processor = ProcessorLevel1(app_context)
+        level1_processor.process("raw_data")
+        ```
+
+### Rules and Coding Principles from Chapter 8
+
+**Core Principle:**
+
+*   **PRINCIPLE 1: Pull Complexity Downwards**
+    *   **Description:** When faced with unavoidable complexity related to a module's function, handle that complexity *within* the module's implementation rather than exposing it through the interface for users to manage.
+    *   **Explanation:** This minimizes the burden on the (potentially many) users of the module, even if it increases the implementation effort for the (few) module developers.
+    *   **LLM Guidance:** When designing a module's interface and implementation, actively look for opportunities to absorb complexity internally. If a piece of logic, error handling, or configuration can be managed within the module without requiring user intervention or knowledge, prefer doing so.
+
+**Implementation Rules & Guidelines:**
+
+*   **RULE 1: Prioritize Interface Simplicity over Implementation Simplicity**
+    *   **Description:** It is more important for a module to have a simple, easy-to-use interface than a simple implementation.
+    *   **Explanation:** A complex interface burdens all users of the module, while a complex implementation only burdens the module's developers. Reducing the load on users has a greater impact on overall system complexity.
+    *   **LLM Guidance:** When evaluating design trade-offs, give higher weight to solutions that simplify the module's public API, even if the internal code becomes more sophisticated. (Connects to Deep Modules - Ch 4).
+
+*   **RULE 2: Avoid Pushing Complexity Upwards (e.g., via Exceptions, Configuration)**
+    *   **Description:** Resist the temptation to defer difficult decisions or error handling by throwing generic exceptions or creating configuration parameters that simply pass the problem to the caller or administrator.
+    *   **Explanation:** This approach amplifies complexity by requiring many different users/callers/administrators to understand and handle the issue, rather than solving it once within the module.
+    *   **LLM Guidance:** Before adding a configuration parameter or defining an exception that callers must catch and handle, consider if the module itself could make a reasonable decision, provide a sensible default, or handle the condition internally.
+
+*   **RULE 3: Encapsulate Complexity Related to the Module's Core Function**
+    *   **Description:** If complexity arises from the core task the module performs (e.g., managing line breaks within a text buffer, calculating retry intervals in a network protocol), that complexity should ideally be hidden within the module.
+    *   **Explanation:** This leads to better information hiding (Ch 5) and deeper modules (Ch 4), as the module provides a higher-level, simpler abstraction.
+    *   **LLM Guidance:** Analyze the source of complexity. If it's intrinsic to *how* the module performs its function, encapsulate it. The text editor example (character-oriented API hiding line management) is key here.
+
+*   **RULE 4: Minimize Configuration Parameters**
+    *   **Description:** Avoid introducing configuration parameters unless users or administrators genuinely possess better information to determine the optimal value, or different use cases absolutely require different settings that cannot be deduced automatically.
+    *   **Explanation:** Parameters often represent incomplete solutions passed upwards. They increase cognitive load and the potential for misconfiguration.
+    *   **LLM Guidance:** Challenge the need for every proposed configuration parameter. Ask: "Can the module compute a reasonable value itself?" "Will the user *really* know better?" Prefer self-tuning or calculated values over static parameters.
+
+    *   **Example (Conceptual - Bad - Pushing Complexity Up):**
+        ```typescript
+        // Network client requires caller to specify timeout details
+        class NetworkClient {
+            constructor(private config: { retryAttempts: number; retryDelayMs: number; connectTimeoutMs: number }) {}
+
+            async fetchData(url: string): Promise<any> {
+                // Implementation uses this.config.retryAttempts, this.config.retryDelayMs etc.
+                // The user MUST figure out good values for these.
+            }
+        }
+        // User code: Needs to guess or research good values
+        // const client = new NetworkClient({ retryAttempts: 3, retryDelayMs: 500, connectTimeoutMs: 2000 });
+        ```
+
+    *   **Example (Conceptual - Good - Pulling Complexity Down):**
+        ```typescript
+        // Network client calculates timeouts, maybe allows overrides via optional params
+        class NetworkClient {
+            private calculatedTimeoutMs: number;
+            private calculatedRetryAttempts: number;
+
+            constructor(options?: { baseTimeoutMs?: number }) { // Optional override
+                // Internal logic to calculate sensible defaults based on environment or measurements
+                this.calculatedTimeoutMs = options?.baseTimeoutMs ?? this.measureNetworkSpeed() * 1.5;
+                this.calculatedRetryAttempts = 3; // Sensible default
+            }
+
+            private measureNetworkSpeed(): number { return 500; /* Simulate measurement */ }
+
+            async fetchData(url: string): Promise<any> {
+                // Implementation uses calculated values: this.calculatedTimeoutMs, etc.
+            }
+        }
+        // User code: Simpler, relies on internal logic
+        const client = new NetworkClient();
+        // Or advanced user provides a hint:
+        // const clientHighLatency = new NetworkClient({ baseTimeoutMs: 5000 });
+        ```
+
+*   **RULE 5: Provide Smart Defaults for Necessary Parameters**
+    *   **Description:** If configuration parameters are unavoidable, compute and provide sensible default values so that users only need to specify them in exceptional circumstances.
+    *   **Explanation:** This follows the principle of making the common case simple (Ch 4, Ch 5). Most users shouldn't need to worry about the parameter.
+    *   **LLM Guidance:** When defining parameters (in constructors, methods, or config files), always implement logic to provide a reasonable default value if the user doesn't supply one.
+
+**Limits and Caveats:**
+
+*   **RULE 6: Ensure Pulled-Down Complexity is Relevant and Beneficial**
+    *   **Description:** Only pull complexity downwards if it is (a) closely related to the module's core responsibility, (b) genuinely simplifies other parts of the system significantly, and (c) simplifies the module's interface.
+    *   **Explanation:** Pulling down unrelated complexity introduces information leakage (Ch 5, Ch 6 example of `backspace` method in text class) and doesn't reduce *overall* system complexity.
+    *   **LLM Guidance:** Evaluate the nature of the complexity being pulled down. Does it belong conceptually within this module? Does simplifying the callers outweigh the added implementation complexity? Does it make the *interface* cleaner? If yes to all, proceed. If no, the complexity might belong elsewhere or need a different abstraction.
+
+
+### Rules and Coding Principles from Chapter 14
+
+**Core Principles:**
+
+*   **PRINCIPLE 1: Treat Naming as a Critical Design Activity**
+    *   **Description:** Recognize that selecting names is not a trivial task but a fundamental part of creating clear, maintainable, and less complex software.
+    *   **Explanation:** Good names are documentation, reduce ambiguity, prevent bugs, and improve understandability significantly. This is an incremental complexity area where consistent effort pays off.
+    *   **LLM Guidance:** Dedicate specific attention to generating high-quality names during code generation. Don't default to the first generic name that comes to mind for non-trivial entities.
+
+*   **PRINCIPLE 2: Names Should Create a Clear and Accurate Mental Image**
+    *   **Description:** Choose names that evoke an accurate mental picture of what the entity represents or does, highlighting its most important aspects.
+    *   **Explanation:** Names act as abstractions. A good name helps the reader quickly grasp the essence of the entity without needing to examine its implementation or extensive documentation immediately.
+    *   **LLM Guidance:** When choosing a name, evaluate if it clearly suggests the entity's purpose and nature. Ask: "If someone saw only this name, what would they guess it means?"
+
+**Rules for Achieving Good Names:**
+
+*   **RULE 1: Ensure Name Precision; Avoid Vague Names (Red Flag: Vague Name)**
+    *   **Description:** Names must be specific enough to clearly differentiate the entity from other related concepts. Avoid overly generic terms like `count`, `status`, `temp`, `result` (unless context makes it crystal clear, like `result` in a function that computes *a* result).
+    *   **Explanation:** Vague names obscure meaning, force readers to look up definitions or code, and can lead to misuse (as in the `block` example).
+    *   **LLM Guidance:** Generate specific names reflecting the entity's role (e.g., `numActiveUsers` instead of `count`, `isCursorVisible` instead of `blinkStatus`, `fileBlockIndex` instead of `block`). Flag generic names in non-trivial contexts as needing refinement. Boolean variable names should usually be predicates (e.g., `isEmpty`, `isEnabled`).
+
+    *   **Example (Python - Vague vs. Precise):**
+        ```python
+        # Bad: Vague
+        data = load_resource()
+        flag = check_status()
+        value = compute()
+
+        # Good: Precise
+        user_profile = load_user_profile_resource()
+        is_connection_active = check_server_connection_status()
+        estimated_cost_usd = compute_estimated_cost()
+        ```
+
+*   **RULE 2: Use Generic Names (like `i`, `j`) Only for Limited, Obvious Scopes**
+    *   **Description:** Short, generic names like `i`, `j`, `k` for loop counters or `temp` for a very short-lived variable are acceptable *only* when their declaration, usage, and scope are extremely small and immediately obvious (e.g., a loop spanning only a few lines).
+    *   **Explanation:** If the entire context is visible at once, the meaning is clear from usage, reducing the need for a descriptive name. Longer scopes require more descriptive names.
+    *   **LLM Guidance:** Use single-letter loop variables (`i`, `j`) only for simple, short loops where the iteration subject is obvious. For longer loops or complex iterations, use descriptive names (e.g., `userIndex`, `rowIndex`).
+
+*   **RULE 3: Avoid Names That Are Too Specific**
+    *   **Description:** Do not use a name that implies a narrower meaning or specific context than the entity actually possesses.
+    *   **Explanation:** This can mislead readers into thinking the entity is only usable in that specific context.
+    *   **LLM Guidance:** If a variable represents a general concept (e.g., a range of items), don't name it after one specific use case (e.g., `selection` if it can represent any range). Use a more general term (`range`, `textRange`).
+
+*   **RULE 4: Use Names Consistently**
+    *   **Description:** Assign a specific name to a specific concept and use that name *exclusively* for that concept throughout the codebase. Do not reuse the name for different concepts.
+    *   **Explanation:** Consistency allows readers to build context and reliably infer meaning when they encounter a familiar name. Reusing names for different things causes confusion and bugs (the `block` example).
+    *   **LLM Guidance:** Maintain a consistent mapping between concepts and names within the scope of generation. If generating code involving file blocks, consistently use `fileBlockIndex` (or similar chosen standard) and avoid using that name for disk block numbers.
+
+*   **RULE 5: Use Prefixes or Suffixes to Distinguish Related Names**
+    *   **Description:** When multiple variables represent similar kinds of entities within the same context, use the consistent base name but add distinguishing prefixes or suffixes.
+    *   **Explanation:** Clearly differentiates related items while maintaining consistency.
+    *   **LLM Guidance:** For related concepts like source/destination or old/new values, use patterns like `srcValue`/`dstValue`, `oldName`/`newName`.
+
+    *   **Example (TypeScript - Distinguishing Prefixes):**
+        ```typescript
+        // Bad: Ambiguous 'count'
+        function processItems(items, count) { /* ... */ }
+
+        // Good: Clearer roles
+        function processItems(items: Item[], maxItemsToProcess: number): ProcessResult {
+             let itemsProcessedCount = 0;
+             // ... logic using maxItemsToProcess and incrementing itemsProcessedCount ...
+             return { count: itemsProcessedCount };
+        }
+        ```
+
+*   **RULE 6: Treat Difficulty in Naming as a Design Red Flag (Red Flag: Hard to Pick Name)**
+    *   **Description:** If finding a simple, precise, and intuitive name for an entity proves difficult, it often indicates that the entity's purpose or design is unclear or overly complex.
+    *   **Explanation:** Naming difficulty can surface underlying design problems.
+    *   **LLM Guidance:** If struggling to generate a good name based on the entity's apparent role, flag this as a potential design issue. Suggest reconsidering the entity's responsibilities or factoring.
+
+*   **RULE 7: Prioritize Readability for the Reader**
+    *   **Description:** While coding styles vary (e.g., Go's short names), the ultimate measure of a name's quality is whether it makes the code clear and easy to understand for *readers*, not just the writer.
+    *   **Explanation:** Acknowledges differing opinions but grounds the decision in the practical outcome of understandability.
+    *   **LLM Guidance:** Default towards names that are precise and descriptive. While adhering to language/project conventions, err on the side of clarity, especially when ambiguity could arise. Use longer names if the scope of usage is large.
+
+**Mindset:**
+
+*   **PRINCIPLE 3: View Good Naming as an Investment**
+    *   **Description:** Recognize that spending extra time choosing excellent names is an investment that pays off by reducing future complexity, debugging time, and maintenance effort.
+    *   **Explanation:** Connects naming to the book's overall investment mindset. Skill improves with practice.
+    *   **LLM Guidance:** Justify the generation of clear, precise names by framing it as a contribution to long-term code health and maintainability.
+
+### Rules and Coding Principles from Chapter 17
+
+*   **PRINCIPLE 1: Strive for Consistency**
+    *   **Description:** Actively apply consistency in naming, coding style, interface design, pattern usage, and invariants throughout the system. Do similar things similarly, and different things differently.
+    *   **Explanation:** Consistency provides cognitive leverage, reduces errors, and makes code more obvious and predictable.
+    *   **LLM Guidance:** Adhere strictly to established project conventions (naming, formatting, patterns). When implementing similar functionality in different places, use the same structural approach.
+
+*   **RULE 1: Document Conventions**
+    *   **Description:** Explicitly write down important project-wide conventions (like style guides) and local conventions (like invariants) where developers can easily find them.
+    *   **Explanation:** Makes conventions discoverable and serves as a reference, especially for new team members.
+    *   **LLM Guidance:** When generating code for a project context, be aware of (or ask for) its style guide and conventions. Document any non-obvious invariants introduced.
+
+*   **RULE 2: Enforce Conventions Actively**
+    *   **Description:** Use automated tools (linters, formatters, pre-commit hooks) and code reviews to ensure adherence to conventions.
+    *   **Explanation:** Automation catches objective violations; reviews handle subjective aspects and educate the team.
+    *   **LLM Guidance:** Integrate with linters/formatters if possible. During code generation or review simulation, check against known conventions.
+
+*   **RULE 3: Follow Existing Patterns ("When in Rome...")**
+    *   **Description:** When modifying existing code, observe and adopt the conventions and patterns already in use in that specific file or module.
+    *   **Explanation:** Prioritizes local consistency, even if the local convention differs slightly from a global one (though ideally, they align).
+    *   **LLM Guidance:** Before generating code within an existing file or module, analyze the surrounding code for prevailing styles (naming, structure, etc.) and mimic them.
+
+*   **RULE 4: Avoid Introducing New, Inconsistent Conventions Lightly**
+    *   **Description:** Resist the urge to deviate from established conventions just because you have a "better idea." Only change conventions if the benefit is substantial and there's a commitment to update all existing instances.
+    *   **Explanation:** The cost of inconsistency usually outweighs the minor benefits of a slightly different approach. Stability is valuable.
+    *   **LLM Guidance:** Default to established conventions. If proposing a deviation, clearly articulate the significant benefits and acknowledge the cost of inconsistency or the need for widespread updates.
+
+*   **RULE 5: Don't Force Dissimilar Things to Be Consistent**
+    *   **Description:** Apply consistency where concepts are genuinely similar. Do not use the same name or pattern for things that are fundamentally different, as this creates confusion.
+    *   **Explanation:** Consistency is about clarifying true similarities, not masking real differences.
+    *   **LLM Guidance:** Ensure that when applying a consistent name or pattern, the underlying concepts or behaviors are truly analogous. If applying a pattern feels forced, reconsider.
+
+
+### Rules and Coding Principles from Chapter 18
+
+*   **PRINCIPLE 1: Strive for Obvious Code**
+    *   **Description:** Design and write code such that its purpose, behavior, and meaning are readily apparent to a reader with minimal effort.
+    *   **Explanation:** Obvious code reduces cognitive load, minimizes misunderstandings, requires fewer comments, and leads to fewer bugs.
+    *   **LLM Guidance:** Prioritize clarity and predictability in generated code. Aim for code where the reader's first assumption about its function is likely correct.
+
+*   **RULE 1: Use Good Names and Consistency**
+    *   **Description:** Leverage precise naming (Ch 14) and consistent patterns (Ch 17) as primary tools for making code obvious.
+    *   **Explanation:** These are foundational elements of clarity.
+    *   **LLM Guidance:** Apply naming and consistency rules diligently as they directly contribute to obviousness.
+
+*   **RULE 2: Use White Space Effectively**
+    *   **Description:** Employ blank lines to separate logical blocks within methods and use spacing within expressions to clarify structure.
+    *   **Explanation:** Improves visual parsing and readability.
+    *   **LLM Guidance:** Generate code with standard, readable formatting, including blank lines between distinct logical sections of a function/method.
+
+*   **RULE 3: Add Comments to Explain Non-Obvious Code**
+    *   **Description:** When code must necessarily be complex, subtle, or behave in an unexpected way, use comments to provide the missing context or explanation needed for obviousness.
+    *   **Explanation:** Comments compensate where clarity cannot be fully achieved through code structure alone.
+    *   **LLM Guidance:** Identify potentially non-obvious code sections (complex logic, subtle interactions, deviations from standard patterns, event handlers) and generate explanatory comments.
+
+*   **RULE 4: Avoid Generic Containers When Specific Meanings Are Obscured**
+    *   **Description:** Prefer defining specific small classes or structs with meaningful field names over using generic containers like `Pair` or `Tuple` if the generic names (`item1`, `item2`) obscure the purpose of the elements.
+    *   **Explanation:** Prioritizes readability and obviousness for the reader over slight convenience for the writer.
+    *   **LLM Guidance:** When needing to group related values (e.g., multiple return values), suggest defining a small, dedicated class/struct with descriptive names for the fields instead of using generic pairs/tuples.
+
+    *   **Example (Java - Generic vs. Specific):**
+        ```java
+        // Bad: Non-obvious element meanings
+        Pair<Integer, Boolean> termInfo = getTermInfo();
+        int term = termInfo.getKey();
+        boolean isLeader = termInfo.getValue();
+
+        // Good: Obvious element meanings
+        class TermInfo {
+             final int term;
+             final boolean isLeader;
+             TermInfo(int term, boolean isLeader) { this.term = term; this.isLeader = isLeader; }
+        }
+        TermInfo termInfo = getTermInfo();
+        int term = termInfo.term;
+        boolean isLeader = termInfo.isLeader;
+        ```
+
+*   **RULE 5: Match Declaration and Allocation Types Where Subtype Matters**
+    *   **Description:** If the specific subtype used in an allocation (`new ArrayList<>()`) has significantly different performance or behavioral implications than the declared supertype (`List<>`), consider declaring the variable with the specific subtype for clarity.
+    *   **Explanation:** Avoids misleading readers who might make assumptions based only on the declaration.
+    *   **LLM Guidance:** When the specific implementation choice (e.g., `ArrayList` vs. `LinkedList`) has important non-obvious consequences for the variable's usage, declare the variable with the specific type, or add a comment clarifying the choice and its implications.
+
+*   **RULE 6: Document Code That Violates Expectations**
+    *   **Description:** If code deviates from standard patterns or common reader assumptions (e.g., non-standard resource management, unexpected side effects, threads continuing after `main` returns), add explicit comments explaining the deviation.
+    *   **Explanation:** Prevents confusion and incorrect assumptions by explicitly stating the unusual behavior.
+    *   **LLM Guidance:** Identify code patterns that might contradict typical developer expectations for the language or context. Generate clear comments highlighting and explaining the non-standard behavior.
+
+*   **PRINCIPLE 2: Design for Reading, Not Writing**
+    *   **Description:** Optimize code and structure for the ease of future readers, even if it requires slightly more effort from the initial writer.
+    *   **Explanation:** This underlying principle justifies rules like avoiding generic containers or taking time for good names and comments. Maintainability depends on readability.
+    *   **LLM Guidance:** In trade-offs between writing convenience and reading clarity, consistently favor clarity and obviousness for the reader.
+
+*   **PRINCIPLE 3: Use Code Reviews to Gauge Obviousness**
+    *   **Description:** Recognize that the best measure of obviousness comes from feedback from others reading the code. Treat reviewer feedback about lack of clarity seriously.
+    *   **Explanation:** "Obvious" is subjective to the reader.
+
+    *   **LLM Guidance:** When simulating code review or evaluating code, adopt the perspective of a reader unfamiliar with the code. Flag sections that require significant effort to understand as potentially non-obvious.

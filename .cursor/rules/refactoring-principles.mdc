@@ -1,0 +1,109 @@
+---
+description: Refactoring code, especialy when deciding how to organize/divide/combine functions or modules
+globs: 
+alwaysApply: false
+---
+
+### Rules and Coding Principles from Chapter 9
+
+**Core Decision Framework:**
+
+*   **PRINCIPLE 1: Decide "Together or Apart" Based on Overall Complexity**
+    *   **Description:** When deciding whether to combine or separate functionality, choose the structure that minimizes the total complexity of the system, considering interface complexity, dependencies, information hiding, and cognitive load.
+    *   **Explanation:** Simply minimizing the size of individual components is insufficient; the connections and dependencies *between* components also contribute significantly to complexity.
+    *   **LLM Guidance:** Evaluate both options (combine vs. separate). Estimate the complexity impact of each regarding interfaces, dependencies, potential for information leakage, and ease of understanding. Choose the option that yields the lowest *overall* complexity.
+
+**Reasons to Bring Functionality Together:**
+
+*   **RULE 1: Combine Functionality That Shares Significant Information**
+    *   **Description:** If two pieces of code rely heavily on the same underlying knowledge or data structures (e.g., specifics of a file format, protocol details), implementing them together in the same module often reduces information leakage and duplication.
+    *   **Explanation:** Separating them forces the shared knowledge to be duplicated or passed between modules, increasing complexity and coupling. (Connects to Ch 5 - Information Hiding).
+    *   **LLM Guidance:** Identify modules or methods that both need intimate knowledge of the same complex concept. Consider merging them or creating a shared lower-level module encapsulating that knowledge, used by both. (HTTP Request reading/parsing example).
+
+*   **RULE 2: Combine Functionality If It Simplifies the Interface for Users**
+    *   **Description:** Merging related pieces of functionality can sometimes allow for a simpler, higher-level interface that hides intermediate steps or automates common configurations.
+    *   **Explanation:** Eliminating intermediate interfaces or providing automated behavior (like default buffering) reduces cognitive load and complexity for the module's users. (Connects to Ch 8 - Pull Complexity Downwards).
+    *   **LLM Guidance:** Look for situations where users typically chain calls to multiple related methods or need to configure multiple related objects. Evaluate if merging these into a single module with a simpler facade or automated behavior would be beneficial. (Java I/O buffering example).
+
+*   **RULE 3: Combine Functionality to Eliminate Duplication (Red Flag: Repetition)**
+    *   **Description:** If the same or very similar code blocks appear in multiple places, consolidate them by either extracting the common code into a shared method/class or restructuring the logic so the code only needs to exist once.
+    *   **Explanation:** Duplication increases maintenance overhead and the risk of inconsistencies. It often signals a missing abstraction.
+    *   **LLM Guidance:** Scan for repeated code patterns. Suggest extracting them into a private helper method, a utility function, or potentially a new class if the duplication is substantial and represents a coherent concept.
+
+    *   **Example (Python - Consolidating Error Handling - Conceptual like Fig 9.2):**
+        ```python
+        # Bad: Duplicated cleanup/logging
+        def process_request(req):
+            resource = acquire_resource()
+            if not resource:
+                log_error("Failed to acquire resource") # Duplication
+                release_resource(resource) # Duplication
+                return ERROR_CODE_1
+            # ... use resource ...
+            if req.type == 'A':
+                 if not process_type_a(req, resource):
+                      log_error("Failed processing type A") # Duplication
+                      release_resource(resource) # Duplication
+                      return ERROR_CODE_2
+            # ... more logic ...
+            release_resource(resource)
+            return SUCCESS_CODE
+
+        # Better: Using try/finally or similar to consolidate cleanup
+        def process_request_better(req):
+             resource = None
+             try:
+                 resource = acquire_resource()
+                 if not resource:
+                      log_error("Failed to acquire resource")
+                      return ERROR_CODE_1 # Return directly from `try` is okay here
+
+                 # ... use resource ...
+                 if req.type == 'A':
+                     if not process_type_a(req, resource):
+                         log_error("Failed processing type A")
+                         return ERROR_CODE_2 # Return directly
+
+                 # ... more logic ...
+                 return SUCCESS_CODE
+             finally:
+                 # Cleanup happens here regardless of how the try block exits
+                 if resource:
+                     release_resource(resource)
+        ```
+        *(Note: The `goto` example in the book is less idiomatic in Python/TS; `try/finally` or context managers often achieve similar consolidation).*
+
+**Reasons to Keep Functionality Separate:**
+
+*   **RULE 4: Separate General-Purpose from Special-Purpose Code (Red Flag: Special-General Mixture)**
+    *   **Description:** Keep core, reusable mechanisms (general-purpose) separate from code that adapts or uses those mechanisms for a specific application feature (special-purpose).
+    *   **Explanation:** Mixing them complicates the general mechanism, creates information leakage from the specific use case into the general code, and hinders reusability. Special-purpose code typically belongs in higher layers. (Connects to Ch 6 - General-Purpose Modules).
+    *   **LLM Guidance:** Identify code within a module that seems specific to only one particular use case, while the rest of the module is broadly applicable. Suggest moving the specialized code to the module responsible for that use case, likely a higher-level module that *uses* the general-purpose one. (Text editor and Undo examples).
+
+*   **RULE 5: Separate Functionality if Combining Complicates Interface or Implementation Unnecessarily**
+    *   **Description:** Do not force functionality together if doing so results in a more awkward interface for users or a more complex internal implementation, despite superficial relatedness.
+    *   **Explanation:** The goal is overall simplicity. If combining makes things *harder* to use or understand, separation is better, even if the concepts seem linked.
+    *   **LLM Guidance:** Evaluate the combined interface and implementation complexity. If users still need to mentally treat the combined concepts separately, or if the combined implementation requires awkward state management (like the boolean for cursor position), prefer separation. (Cursor/Selection example).
+
+*   **RULE 6: Separate Independent Pieces of Functionality**
+    *   **Description:** If two pieces of code have minimal shared information, are not typically used together, don't overlap conceptually, and can be understood independently, keep them separate.
+    *   **Explanation:** Separation is beneficial when components are truly independent, allowing focus and reducing cognitive load.
+    *   **LLM Guidance:** Assess the degree of coupling and conceptual overlap. If low, favor separation into distinct modules/classes.
+
+**Guidance on Splitting/Joining Methods:**
+
+*   **RULE 7: Split Methods to Improve Abstraction, Not Just Reduce Length**
+    *   **Description:** Only split a method if it allows extracting a cleanly separable, potentially reusable subtask into a new method, or if it divides a multi-responsibility method into simpler, independent methods that simplify the caller's interaction. Do not split solely based on line count.
+    *   **Explanation:** Splitting adds interface complexity; it must be justified by improving the clarity or reusability of the resulting abstractions. Long methods are acceptable if they are cohesive and have a simple interface (deep).
+    *   **LLM Guidance:** Evaluate *why* a method split is being considered. If it's just length, advise against it unless the method also fails abstraction criteria. If splitting extracts a clear sub-task or simplifies a complex interface, support it.
+
+*   **RULE 8: Avoid Creating Shallow or Conjoined Methods (Red Flag: Conjoined Methods)**
+    *   **Description:** When splitting methods, ensure the resulting methods are not too shallow (minimal functionality behind an interface) or conjoined (impossible to understand one without understanding the implementation details of the other).
+    *   **Explanation:** Such splits increase complexity without providing abstraction benefits.
+    *   **LLM Guidance:** Analyze the proposed split methods. If they are trivial wrappers or require constant cross-referencing during understanding, flag the split as potentially harmful.
+
+*   **RULE 9: Join Methods If It Increases Depth or Reduces Complexity**
+    *   **Description:** Consider merging methods if doing so creates a single, deeper method, eliminates duplication, removes awkward dependencies or intermediate data structures between them, or simplifies the overall interface presented to callers.
+    *   **Explanation:** Merging can improve encapsulation and reduce the surface area callers need to interact with.
+    *   **LLM Guidance:** Look for sequences of calls to related, often shallow, methods. Evaluate if merging them into a single, deeper method would provide a better abstraction and simplify usage. (Example: Merging HTTP read + parse).
+

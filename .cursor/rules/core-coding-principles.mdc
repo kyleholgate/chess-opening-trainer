@@ -1,0 +1,61 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+### Summary of Core Design Principles
+
+These are the overarching guidelines for creating software with minimal complexity:
+
+1.  **P1: Complexity Accumulates Incrementally.**
+    *   Small complexities (dependencies, obscurities) add up over time. Be vigilant about even minor design issues ("sweat the small stuff"). (Connects to Ch 2, Ch 3).
+2.  **P2: Prioritize Design Quality over Mere Functionality.**
+    *   Code that simply "works" is insufficient. Strive for a clean, maintainable, and understandable design (Strategic Programming). (Connects to Ch 3).
+3.  **P3: Invest Continuously in Design Improvement.**
+    *   Regularly allocate time for refactoring and design cleanup. This investment pays off in long-term development speed and reduced complexity. (Connects to Ch 3, Ch 16).
+4.  **P4: Design Deep Modules.**
+    *   Modules (classes, methods) should hide significant implementation complexity behind simple interfaces. Maximize the ratio of functionality to interface complexity. (Connects to Ch 4, Ch 5).
+5.  **P5: Simplify Interfaces for Common Cases.**
+    *   Design APIs so that the most frequent operations are the easiest and most obvious to perform. (Connects to Ch 4, Ch 5, Ch 7).
+6.  **P6: Prioritize Simple Interfaces over Simple Implementations.**
+    *   It's more important to reduce complexity for the *user* of a module (simple interface) than for the *developer* of the module (simple implementation). (Connects to Ch 4, Ch 8).
+7.  **P7: Favor "Somewhat General-Purpose" Modules.**
+    *   Design modules based on fundamental capabilities rather than overly specific current needs. This often leads to simpler, deeper interfaces. (Connects to Ch 6).
+8.  **P8: Separate General and Special-Purpose Logic.**
+    *   Do not mix general, reusable mechanisms with code specific to a particular use case within the same module. Specialized code usually belongs in higher layers. (Connects to Ch 6, Ch 9).
+9.  **P9: Ensure Distinct Abstractions Between Layers.**
+    *   Adjacent layers in a system should provide different abstractions; similar abstractions indicate potential redundancy or poor layering. (Connects to Ch 7).
+10. **P10: Pull Complexity Downwards.**
+    *   Modules should handle complexity internally (e.g., complex algorithms, error recovery, configuration choices) rather than exposing it through their interfaces. (Connects to Ch 8).
+11. **P11: Define Errors/Special Cases Out Of Existence.**
+    *   Modify API semantics or internal logic so that conditions previously treated as errors or special cases become part of the normal flow, eliminating the need for explicit handling by callers. (Connects to Ch 10).
+12. **P12: Explore Multiple Design Options ("Design it Twice").**
+    *   Before settling on a design, consciously develop and evaluate at least one distinct alternative. Comparing options leads to better final designs. (Connects to Ch 11).
+13. **P13: Comment What Isn't Obvious from Code.**
+    *   Comments should explain the 'why' (intent, rationale), provide higher-level abstractions, or add precision (units, boundaries) – information not readily apparent from the code statements themselves. (Connects to Ch 12, Ch 13).
+14. **P14: Design for Readability.**
+    *   Optimize code clarity and structure for future readers, even if it takes slightly more effort during initial writing. (Connects to Ch 14, Ch 18).
+15. **P15: Increments Should Be Abstractions, Not Just Features.**
+    *   Focus incremental development efforts on designing and refining clean abstractions as needed, rather than just tacking on features using the existing structure tactically. (Connects to Ch 3, Ch 19).
+
+---
+
+### Summary of Key Red Flags
+
+These are symptoms indicating potential design problems that increase complexity:
+
+1.  **RF1: Shallow Module:** An interface provides little abstraction; its complexity is comparable to its implementation's complexity. (Opposite of P4; see Ch 4).
+2.  **RF2: Information Leakage:** Knowledge of a single design decision is embedded in multiple modules, creating dependencies. (Violates Info Hiding; see Ch 5, Ch 9).
+3.  **RF3: Temporal Decomposition:** Module structure is based on the time sequence of operations (e.g., read, then parse, then write classes), often leading to RF2. (See Ch 5).
+4.  **RF4: Overexposure:** A commonly used API forces users to learn about or deal with options/features that are rarely needed. (Violates P5; see Ch 5, Ch 8).
+5.  **RF5: Pass-Through Method:** A method adds little or no value, primarily just calling another method with a similar signature. (Violates P9; see Ch 7).
+6.  **RF6: Repetition:** The same non-trivial code block is duplicated in multiple places. (Suggests missing abstraction; see Ch 9).
+7.  **RF7: Special-General Mixture:** A module mixes general-purpose logic with code tailored for a specific use case. (Violates P8; see Ch 6, Ch 9).
+8.  **RF8: Conjoined Methods:** Two methods are overly interdependent, making it impossible to understand or modify one without detailed knowledge of the other's implementation. (See Ch 9).
+9.  **RF9: Comment Repeats Code:** A comment provides no new information beyond what is obvious from reading the adjacent code. (Violates P13; see Ch 13).
+10. **RF10: Implementation Documentation Contaminates Interface:** Interface comments (e.g., for a method) describe internal implementation details irrelevant to the caller. (Violates Info Hiding/Abstraction; see Ch 13).
+11. **RF11: Vague Name:** A name (variable, method, etc.) is too generic or ambiguous to clearly convey its specific purpose. (Violates naming principles; see Ch 14).
+12. **RF12: Hard to Pick Name:** Significant difficulty in finding a clear, concise, and precise name often indicates an underlying design problem with the entity itself. (See Ch 14).
+13. **RF13: Hard to Describe:** A variable or method requires a long, complex comment to be fully and accurately described, suggesting excessive interface complexity. (Indicator of shallow module/poor abstraction; see Ch 15).
+14. **RF14: Nonobvious Code:** Code whose behavior, meaning, or purpose is not easily understood from a quick reading, requiring significant effort or investigation. (Violates P14; see Ch 18).
+
