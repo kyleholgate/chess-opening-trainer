@@ -89,8 +89,8 @@
                                                                                                                     "frequency": 0.13,
                                                                                                                     "comment": "A less common king retreat.",
                                                                                                                     "children": {
-                                                                                                                        "Qxc5": {
-                                                                                                                            "move": "Qxc5",
+                                                                                                                        "Qxc5+": {
+                                                                                                                            "move": "Qxc5+",
                                                                                                                             "comment": "Winning back the piece immediately.",
                                                                                                                             "children": {
                                                                                                                                 "d6": {
