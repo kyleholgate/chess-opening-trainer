@@ -362,49 +362,47 @@
                                                                         }
                                                                     }
                                                                 },
-                                                                {
-                                                                    "d6": {
-                                                                        "move": "d6",
-                                                                        "comment": "Solidifying the e5 pawn and opening lines for the c8 bishop.",
-                                                                        "children": {
-                                                                            "c3": {
-                                                                                "move": "c3",
-                                                                                "comment": "White plays c3, preparing to fight for central control.",
-                                                                                "children": {
-                                                                                    "dxc3": {
-                                                                                        "move": "dxc3",
-                                                                                        "frequency": 0.46,
-                                                                                        "comment": "Black captures the pawn.",
-                                                                                        "children": {
-                                                                                            "Qb3": {
-                                                                                                "move": "Qb3",
-                                                                                                "comment": "Our idea here is to attack the b7 pawn if Black moves out their bishop.",
-                                                                                                "isEndOfVariation": true
-                                                                                            }
+                                                                "d6": {
+                                                                    "move": "d6",
+                                                                    "comment": "Solidifying the e5 pawn and opening lines for the c8 bishop.",
+                                                                    "children": {
+                                                                        "c3": {
+                                                                            "move": "c3",
+                                                                            "comment": "White plays c3, preparing to fight for central control.",
+                                                                            "children": {
+                                                                                "dxc3": {
+                                                                                    "move": "dxc3",
+                                                                                    "frequency": 0.46,
+                                                                                    "comment": "Black captures the pawn.",
+                                                                                    "children": {
+                                                                                        "Qb3": {
+                                                                                            "move": "Qb3",
+                                                                                            "comment": "Our idea here is to attack the b7 pawn if Black moves out their bishop.",
+                                                                                            "isEndOfVariation": true
                                                                                         }
-                                                                                    },
-                                                                                    "Bg4": {
-                                                                                        "move": "Bg4",
-                                                                                        "frequency": 0.14,
-                                                                                        "comment": "Black develops the bishop to g4.",
-                                                                                        "children": {
-                                                                                            "Qb3": {
-                                                                                                "move": "Qb3",
-                                                                                                "comment": "We play Qb3 for the same idea, also creating a potential checkmate if we can get the bishop to f7 undefended.",
-                                                                                                "isEndOfVariation": true
-                                                                                            }
+                                                                                    }
+                                                                                },
+                                                                                "Bg4": {
+                                                                                    "move": "Bg4",
+                                                                                    "frequency": 0.14,
+                                                                                    "comment": "Black develops the bishop to g4.",
+                                                                                    "children": {
+                                                                                        "Qb3": {
+                                                                                            "move": "Qb3",
+                                                                                            "comment": "We play Qb3 for the same idea, also creating a potential checkmate if we can get the bishop to f7 undefended.",
+                                                                                            "isEndOfVariation": true
                                                                                         }
-                                                                                    },
-                                                                                    "Nf6": {
-                                                                                        "move": "Nf6",
-                                                                                        "frequency": 0.11,
-                                                                                        "comment": "Black develops the knight.",
-                                                                                        "children": {
-                                                                                            "Qb3": {
-                                                                                                "move": "Qb3",
-                                                                                                "comment": "We still go Qb3 with the same attacking ideas.",
-                                                                                                "isEndOfVariation": true
-                                                                                            }
+                                                                                    }
+                                                                                },
+                                                                                "Nf6": {
+                                                                                    "move": "Nf6",
+                                                                                    "frequency": 0.11,
+                                                                                    "comment": "Black develops the knight.",
+                                                                                    "children": {
+                                                                                        "Qb3": {
+                                                                                            "move": "Qb3",
+                                                                                            "comment": "We still go Qb3 with the same attacking ideas.",
+                                                                                            "isEndOfVariation": true
                                                                                         }
                                                                                     }
                                                                                 }
