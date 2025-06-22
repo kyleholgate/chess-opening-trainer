@@ -129,7 +129,11 @@ export function useChessGame({
       const opponentMove = selectWeightedMove(node.children, allowedMoves);
 
       if (!opponentMove) {
-        setFeedback("You've reached the end of this line!");
+        const comment = node.comment ? ` ${node.comment}` : "";
+        setFeedback(
+          (prevFeedback) =>
+            `${prevFeedback}\n\nYou've reached the end of this line!${comment}`
+        );
         setIsComplete(true);
         return;
       }
@@ -150,15 +154,22 @@ export function useChessGame({
         setIsPlayerTurn(true);
 
         const nextMoves = Object.keys(newNode.children);
+        const comment = newNode.comment ? ` ${newNode.comment}` : "";
+
+        // Append to existing feedback instead of replacing it
+        setFeedback((prevFeedback) => {
+          const blackMoveInfo =
+            nextMoves.length === 0
+              ? `Black played ${opponentMove}. This line is complete!${comment}`
+              : nextMoves.length === 1
+              ? `Black played ${opponentMove}. ${comment}`
+              : `Black played ${opponentMove}. ${comment}`;
+
+          return `${prevFeedback}\n\n${blackMoveInfo}`;
+        });
+
         if (nextMoves.length === 0) {
-          setFeedback(`Black played ${opponentMove}. This line is complete!`);
           setIsComplete(true);
-        } else if (nextMoves.length === 1) {
-          setFeedback(
-            `Black played ${opponentMove}. There's one best response here.`
-          );
-        } else {
-          setFeedback(`Black played ${opponentMove}. What's your next move?`);
         }
 
         onGameStateChange?.({
@@ -218,13 +229,16 @@ export function useChessGame({
         setIsPlayerTurn(false);
 
         const nextMoves = Object.keys(newNode.children);
+        const comment = newNode.comment ? ` ${newNode.comment}` : "";
+
+        // Clear previous feedback and start fresh when White makes a move
         if (nextMoves.length === 0) {
           setFeedback(
-            `Great! You played ${moveString}. This line is complete!`
+            `Great! You played ${moveString}. This line is complete!${comment}`
           );
           setIsComplete(true);
         } else {
-          setFeedback(`Good! You played ${moveString}. Black is thinking...`);
+          setFeedback(`Good! You played ${moveString}.${comment}`);
 
           // Make opponent move after a short delay
           setTimeout(() => {
