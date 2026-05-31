@@ -21,7 +21,9 @@ import { WINDOW_TITLES, Z_INDEX, TIMING } from "../constants/ui";
  */
 export default function Home() {
   const {
-    openingTree,
+    openings,
+    selectedOpening,
+    selectedOpeningId,
     isLoading,
     error,
     isMinimized,
@@ -31,6 +33,7 @@ export default function Home() {
     setIsMinimized,
     setIsClosed,
     setShowContactModal,
+    setSelectedOpeningId,
     relaunchApplication,
   } = useApplicationState();
 
@@ -47,7 +50,7 @@ export default function Home() {
     return <LoadingScreen />;
   }
 
-  if (error || !openingTree) {
+  if (error || !selectedOpening) {
     return <ErrorScreen error={error || "Unknown error occurred"} />;
   }
 
@@ -95,7 +98,11 @@ export default function Home() {
                   <div className="win95-raised p-4 h-full">
                     <div className="win95-panel p-4">
                       <ChessBoard
-                        openingTree={openingTree}
+                        key={selectedOpening.id}
+                        opening={selectedOpening}
+                        openings={openings}
+                        selectedOpeningId={selectedOpeningId}
+                        onOpeningChange={setSelectedOpeningId}
                         onGameStateChange={handleGameStateChange}
                       />
                     </div>
@@ -114,7 +121,7 @@ export default function Home() {
                         <Win95Input
                           variant="textarea"
                           className="p-2 text-xs h-20 w-full"
-                          value="1. e4 e5&#10;2. Nf3 Nc6&#10;3. d4 exd4&#10;4. Bc4"
+                          value={selectedOpening.mainLine.join("\n")}
                           readOnly
                         />
                       </div>
@@ -124,9 +131,9 @@ export default function Home() {
                         </h3>
                         <div className="win95-panel p-2 text-xs">
                           <ul className="text-black space-y-1">
-                            <li>• Sac the pawn on d4</li>
-                            <li>• Get up in that f7</li>
-                            <li>• Look for game-winning traps</li>
+                            {selectedOpening.keyIdeas.map((idea) => (
+                              <li key={idea}>- {idea}</li>
+                            ))}
                           </ul>
                         </div>
                       </div>
@@ -140,10 +147,15 @@ export default function Home() {
                         <strong>How to play:</strong>
                       </p>
                       <ul className="space-y-1 ml-2">
-                        <li>1. You are White</li>
+                        <li>
+                          1. You are{" "}
+                          {selectedOpening.playerColor === "white"
+                            ? "White"
+                            : "Black"}
+                        </li>
                         <li>2. Drag pieces to move</li>
                         <li>3. Follow opening theory</li>
-                        <li>4. Black responds automatically</li>
+                        <li>4. Opponent responds automatically</li>
                         <li>5. Drill until you remember the lines</li>
                       </ul>
                     </div>

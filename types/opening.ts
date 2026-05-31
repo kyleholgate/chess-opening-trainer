@@ -6,6 +6,22 @@ export interface OpeningNode {
   isEndOfVariation?: boolean; // True when this is a terminal node
 }
 
+export type PlayerColor = "white" | "black";
+
+export interface OpeningDefinition {
+  id: string;
+  name: string;
+  description: string;
+  playerColor: PlayerColor;
+  boardOrientation: PlayerColor;
+  startingMoves: string[];
+  variationRootMoves: string[];
+  initialFeedback: string;
+  mainLine: string[];
+  keyIdeas: string[];
+  tree: OpeningNode;
+}
+
 export interface GameState {
   currentPosition: string; // FEN string
   moveHistory: string[]; // Array of SAN moves

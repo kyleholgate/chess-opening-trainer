@@ -3,6 +3,7 @@ export { default as BoardDisplay } from "./BoardDisplay";
 export { default as GameStatus } from "./GameStatus";
 export { default as GameControls } from "./GameControls";
 export { default as SidePanel } from "./SidePanel";
+export { default as OpeningSelector } from "./OpeningSelector";
 
 // Sub-components
 export { default as ThemeSelector } from "./ThemeSelector";

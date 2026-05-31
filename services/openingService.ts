@@ -1,7 +1,57 @@
-import { OpeningNode } from "../types/opening";
+import { OpeningDefinition, OpeningNode } from "../types/opening";
 import { parseOpeningTree } from "../utils/opening-parser";
 import scotchGambitData from "../data/scotch-gambit.json";
+import scandinavianDefenseData from "../data/scandinavian-defense.json";
 import { TIMING, ERROR_MESSAGES } from "../constants/ui";
+
+type OpeningConfig = Omit<OpeningDefinition, "tree">;
+
+const OPENING_CONFIGS: OpeningConfig[] = [
+  {
+    id: "scotch-gambit",
+    name: "Scotch Gambit",
+    description: "Practice the Scotch Gambit as White from 1.e4 e5 2.Nf3 Nc6 3.d4 exd4 4.Bc4.",
+    playerColor: "white",
+    boardOrientation: "white",
+    startingMoves: ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Bc4"],
+    variationRootMoves: ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Bc4"],
+    initialFeedback: "Black to move. How will they respond to the Scotch Gambit?",
+    mainLine: ["1. e4 e5", "2. Nf3 Nc6", "3. d4 exd4", "4. Bc4"],
+    keyIdeas: [
+      "Sac the pawn on d4",
+      "Get up in that f7",
+      "Look for game-winning traps",
+    ],
+  },
+  {
+    id: "scandinavian-defense",
+    name: "Scandinavian Defense",
+    description: "Practice the Scandinavian Defense as Black, starting after White plays 1.e4.",
+    playerColor: "black",
+    boardOrientation: "black",
+    startingMoves: ["e4"],
+    variationRootMoves: ["e4", "d5"],
+    initialFeedback: "Black to move. Challenge White's center with the Scandinavian Defense.",
+    mainLine: [
+      "1. e4 d5",
+      "2. exd5 Qxd5",
+      "3. Nc3 Qa5",
+      "4. d4 c6",
+      "5. Nf3 Nf6",
+      "6. Bc4 Bf5",
+    ],
+    keyIdeas: [
+      "Challenge e4 immediately with ...d5",
+      "Use ...Qa5, ...c6, ...Nf6, and ...Bf5",
+      "Know the b4 queen chase and Portuguese/Icelandic traps",
+    ],
+  },
+];
+
+const OPENING_DATA_BY_ID: Record<string, unknown> = {
+  "scotch-gambit": scotchGambitData,
+  "scandinavian-defense": scandinavianDefenseData,
+};
 
 /**
  * Opening Data Service
@@ -39,12 +89,34 @@ export class OpeningService {
   async loadOpeningTree(
     minimumLoadTime: number = TIMING.LOADING_MINIMUM_DISPLAY
   ): Promise<OpeningNode> {
+    const openings = await this.loadOpenings(minimumLoadTime);
+    const scotchOpening = openings.find((opening) => opening.id === "scotch-gambit");
+
+    if (!scotchOpening) {
+      throw new Error(ERROR_MESSAGES.LOAD_FAILED);
+    }
+
+    return scotchOpening.tree;
+  }
+
+  /**
+   * Loads all bundled opening definitions.
+   *
+   * @param minimumLoadTime - Minimum time to show loading screen
+   * @returns Promise resolving to parsed opening definitions
+   */
+  async loadOpenings(
+    minimumLoadTime: number = TIMING.LOADING_MINIMUM_DISPLAY
+  ): Promise<OpeningDefinition[]> {
     try {
       // Start timing for consistent UX
       const startTime = Date.now();
 
       // Parse the opening data
-      const parsedTree = parseOpeningTree(scotchGambitData);
+      const openings = OPENING_CONFIGS.map((config) => ({
+        ...config,
+        tree: parseOpeningTree(OPENING_DATA_BY_ID[config.id]),
+      }));
 
       // Ensure minimum loading time for better UX perception
       const elapsedTime = Date.now() - startTime;
@@ -54,7 +126,7 @@ export class OpeningService {
         await new Promise((resolve) => setTimeout(resolve, remainingTime));
       }
 
-      return parsedTree;
+      return openings;
     } catch (error) {
       // Log for debugging while providing user-friendly error
       console.error("Opening tree loading failed:", error);
@@ -80,11 +152,11 @@ export class OpeningService {
    * Following P7: Favor "Somewhat General-Purpose" Modules
    */
   async loadOpeningFromSource(source: string): Promise<OpeningNode> {
-    // Placeholder for future multi-source support
-    if (source === "scotch-gambit") {
-      return this.loadOpeningTree();
+    if (!(source in OPENING_DATA_BY_ID)) {
+      throw new Error(`Unknown opening source: ${source}`);
     }
-    throw new Error(`Unknown opening source: ${source}`);
+
+    return parseOpeningTree(OPENING_DATA_BY_ID[source]);
   }
 }
 

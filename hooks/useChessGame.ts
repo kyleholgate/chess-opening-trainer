@@ -1,8 +1,41 @@
 import { useState, useCallback, useEffect } from "react";
 import { Chess } from "chess.js";
-import { OpeningNode } from "../types/opening";
+import { OpeningDefinition, OpeningNode, PlayerColor } from "../types/opening";
 import { selectWeightedMove } from "../utils/weighted-selection";
 import { isValidMove } from "../utils/opening-parser";
+
+type ChessColor = "w" | "b";
+
+function toChessColor(color: PlayerColor): ChessColor {
+  return color === "white" ? "w" : "b";
+}
+
+function getSideName(color: ChessColor): "White" | "Black" {
+  return color === "w" ? "White" : "Black";
+}
+
+function moveListsMatch(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((move, index) => move === b[index]);
+}
+
+function navigateToNode(tree: OpeningNode, moves: string[]): OpeningNode {
+  let node = tree;
+
+  for (const move of moves) {
+    if (!node.children[move]) {
+      break;
+    }
+    node = node.children[move];
+  }
+
+  return node;
+}
+
+function playMoves(game: Chess, moves: string[]) {
+  for (const move of moves) {
+    game.move(move);
+  }
+}
 
 /**
  * Chess Game State Interface
@@ -16,6 +49,8 @@ export interface ChessGameState {
   isPlayerTurn: boolean;
   isComplete: boolean;
   selectedVariations: string[];
+  wrongMoveCount: number;
+  canShowCorrectMove: boolean;
 }
 
 /**
@@ -26,13 +61,14 @@ export interface ChessGameActions {
   onDrop: (sourceSquare: string, targetSquare: string) => boolean;
   resetGame: () => void;
   handleVariationToggle: (move: string) => void;
+  showCorrectMove: () => void;
 }
 
 /**
  * Chess Game Hook Props
  */
 interface UseChessGameProps {
-  openingTree: OpeningNode;
+  opening: OpeningDefinition;
   onGameStateChange?: (state: {
     position: string;
     moveHistory: string[];
@@ -62,70 +98,82 @@ interface UseChessGameProps {
  *
  * @example
  * ```tsx
- * const { gameState, actions } = useChessGame({ openingTree, onGameStateChange });
+ * const { gameState, actions } = useChessGame({ opening, onGameStateChange });
  * ```
  */
 export function useChessGame({
-  openingTree,
+  opening,
   onGameStateChange,
 }: UseChessGameProps): {
   gameState: ChessGameState;
   actions: ChessGameActions;
 } {
-  // Initialize chess game with Scotch Gambit position
+  const playerChessColor = toChessColor(opening.playerColor);
+
+  // Initialize chess game with this opening's practice position
   const [game] = useState(() => {
     const g = new Chess();
-    // Set up Scotch Gambit position: 1.e4 e5 2.Nf3 Nc6 3.d4 exd4 4.Bc4
-    const scotchMoves = ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Bc4"];
-    scotchMoves.forEach((move) => g.move(move));
+    playMoves(g, opening.startingMoves);
     return g;
   });
 
-  // Scotch Gambit starting moves
-  const SCOTCH_GAMBIT_MOVES = ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Bc4"];
-
   // Navigate to starting node in opening tree
   const getStartingNode = useCallback((): OpeningNode => {
-    let node = openingTree;
-    for (const move of SCOTCH_GAMBIT_MOVES) {
-      if (node.children[move]) {
-        node = node.children[move];
-      }
-    }
-    return node;
-  }, [openingTree]);
+    return navigateToNode(opening.tree, opening.startingMoves);
+  }, [opening]);
 
-  // Get available variations (Black's responses after Bc4)
+  // Get available variations from the configured first opponent choice.
   const getAvailableVariations = useCallback(() => {
-    const startingNode = getStartingNode();
-    return Object.keys(startingNode.children).map((move) => ({
+    const variationRootNode = navigateToNode(
+      opening.tree,
+      opening.variationRootMoves
+    );
+
+    return Object.keys(variationRootNode.children).map((move) => ({
       move,
-      comment: startingNode.children[move].comment || "",
-      frequency: startingNode.children[move].frequency || 0.5,
+      comment: variationRootNode.children[move].comment || "",
+      frequency: variationRootNode.children[move].frequency ?? 0.5,
     }));
-  }, [getStartingNode]);
+  }, [opening]);
 
   // Game state
   const [gamePosition, setGamePosition] = useState(game.fen());
-  const [moveHistory, setMoveHistory] = useState<string[]>(SCOTCH_GAMBIT_MOVES);
-  const [currentNode, setCurrentNode] = useState(getStartingNode());
-  const [feedback, setFeedback] = useState(
-    "Black to move. How will they respond to the Scotch Gambit?"
+  const [moveHistory, setMoveHistory] = useState<string[]>(
+    opening.startingMoves
   );
-  const [isPlayerTurn, setIsPlayerTurn] = useState(false);
+  const [currentNode, setCurrentNode] = useState(getStartingNode());
+  const [feedback, setFeedback] = useState(opening.initialFeedback);
+  const [isPlayerTurn, setIsPlayerTurn] = useState(
+    game.turn() === playerChessColor
+  );
   const [isComplete, setIsComplete] = useState(false);
+  const [wrongMoveCount, setWrongMoveCount] = useState(0);
 
   const [availableVariations] = useState(getAvailableVariations());
   const [selectedVariations, setSelectedVariations] = useState<string[]>(
     availableVariations.map((v) => v.move) // Start with all variations selected
   );
 
+  const getCorrectMoveFeedback = useCallback((node: OpeningNode): string => {
+    const correctMoves = Object.keys(node.children);
+
+    if (correctMoves.length === 0) {
+      return "No further moves are available in this line.";
+    }
+
+    return correctMoves.length === 1
+      ? `Correct move: ${correctMoves[0]}`
+      : `Correct moves: ${correctMoves.join(", ")}`;
+  }, []);
+
   // Make opponent move using weighted selection
   const makeOpponentMove = useCallback(
     (node: OpeningNode, history: string[]) => {
-      // Use selected variations only for the first Black move after Bc4
-      const isFirstBlackMove = history.length === 7; // Right after Bc4
-      const allowedMoves = isFirstBlackMove ? selectedVariations : undefined;
+      const isVariationRoot = moveListsMatch(
+        history,
+        opening.variationRootMoves
+      );
+      const allowedMoves = isVariationRoot ? selectedVariations : undefined;
       const opponentMove = selectWeightedMove(node.children, allowedMoves);
 
       if (!opponentMove) {
@@ -139,6 +187,7 @@ export function useChessGame({
       }
 
       try {
+        const opponentSideName = getSideName(game.turn());
         const move = game.move(opponentMove);
         if (!move) {
           console.error("Invalid opponent move:", opponentMove);
@@ -151,21 +200,20 @@ export function useChessGame({
         setGamePosition(game.fen());
         setMoveHistory(newMoveHistory);
         setCurrentNode(newNode);
-        setIsPlayerTurn(true);
+        setIsPlayerTurn(game.turn() === playerChessColor);
+        setWrongMoveCount(0);
 
         const nextMoves = Object.keys(newNode.children);
         const comment = newNode.comment ? ` ${newNode.comment}` : "";
 
         // Append to existing feedback instead of replacing it
         setFeedback((prevFeedback) => {
-          const blackMoveInfo =
+          const opponentMoveInfo =
             nextMoves.length === 0
-              ? `Black played ${opponentMove}. This line is complete!${comment}`
-              : nextMoves.length === 1
-              ? `Black played ${opponentMove}. ${comment}`
-              : `Black played ${opponentMove}. ${comment}`;
+              ? `${opponentSideName} played ${opponentMove}. This line is complete!${comment}`
+              : `${opponentSideName} played ${opponentMove}.${comment}`;
 
-          return `${prevFeedback}\n\n${blackMoveInfo}`;
+          return `${prevFeedback}\n\n${opponentMoveInfo}`;
         });
 
         if (nextMoves.length === 0) {
@@ -176,7 +224,7 @@ export function useChessGame({
           position: game.fen(),
           moveHistory: newMoveHistory,
           currentNode: newNode,
-          feedback: `Black played ${opponentMove}. ${
+          feedback: `${opponentSideName} played ${opponentMove}. ${
             newNode.comment || "What's your response?"
           }`,
           isComplete:
@@ -187,7 +235,7 @@ export function useChessGame({
         console.error("Error making opponent move:", error);
       }
     },
-    [game, onGameStateChange, selectedVariations]
+    [game, onGameStateChange, opening, playerChessColor, selectedVariations]
   );
 
   // Handle piece drop (player move)
@@ -215,7 +263,11 @@ export function useChessGame({
         if (!isValidMove(currentNode, moveString)) {
           // Invalid opening move - undo it
           game.undo();
-          setFeedback(`"${moveString}" is not the correct move. Try again!`);
+          const nextWrongMoveCount = wrongMoveCount + 1;
+          setWrongMoveCount(nextWrongMoveCount);
+          setFeedback(
+            `"${moveString}" is not the correct move. Try again! (${nextWrongMoveCount}/3 wrong attempts)`
+          );
           return false;
         }
 
@@ -227,11 +279,12 @@ export function useChessGame({
         setMoveHistory(newMoveHistory);
         setCurrentNode(newNode);
         setIsPlayerTurn(false);
+        setWrongMoveCount(0);
 
         const nextMoves = Object.keys(newNode.children);
         const comment = newNode.comment ? ` ${newNode.comment}` : "";
 
-        // Clear previous feedback and start fresh when White makes a move
+        // Clear previous feedback and start fresh when the player makes a move
         if (nextMoves.length === 0) {
           setFeedback(
             `Great! You played ${moveString}. This line is complete!${comment}`
@@ -268,30 +321,35 @@ export function useChessGame({
       game,
       currentNode,
       moveHistory,
+      wrongMoveCount,
       makeOpponentMove,
       onGameStateChange,
     ]
   );
 
-  // Reset game to Scotch Gambit position
+  const showCorrectMove = useCallback(() => {
+    const correctMoveFeedback = getCorrectMoveFeedback(currentNode);
+
+    setFeedback((prevFeedback) =>
+      prevFeedback.includes(correctMoveFeedback)
+        ? prevFeedback
+        : `${prevFeedback}\n\n${correctMoveFeedback}`
+    );
+  }, [currentNode, getCorrectMoveFeedback]);
+
+  // Reset game to the selected opening position
   const resetGame = useCallback(() => {
     game.reset();
-    // Play the moves to reach Scotch Gambit position
-    SCOTCH_GAMBIT_MOVES.forEach((move) => game.move(move));
+    playMoves(game, opening.startingMoves);
 
     setGamePosition(game.fen());
-    setMoveHistory([...SCOTCH_GAMBIT_MOVES]);
+    setMoveHistory([...opening.startingMoves]);
     setCurrentNode(getStartingNode());
-    setFeedback("Black to move. How will they respond to the Scotch Gambit?");
-    setIsPlayerTurn(false); // Black moves first from this position
+    setFeedback(opening.initialFeedback);
+    setIsPlayerTurn(game.turn() === playerChessColor);
     setIsComplete(false);
-
-    // Trigger Black's first move after reset with a delay
-    setTimeout(() => {
-      const startingNode = getStartingNode();
-      makeOpponentMove(startingNode, [...SCOTCH_GAMBIT_MOVES]);
-    }, 1500);
-  }, [game, getStartingNode, makeOpponentMove]);
+    setWrongMoveCount(0);
+  }, [game, getStartingNode, opening, playerChessColor]);
 
   // Handle variation selection toggle
   const handleVariationToggle = useCallback((move: string) => {
@@ -308,18 +366,28 @@ export function useChessGame({
     });
   }, []);
 
-  // Auto-start the game by making Black's first move
+  // Auto-start openings where the opponent moves first from the practice position.
   useEffect(() => {
-    // Only make the initial move if we're at the starting position and it's Black's turn
-    if (moveHistory.length === 7 && !isPlayerTurn && !isComplete) {
+    const isAtStartingPosition = moveListsMatch(
+      moveHistory,
+      opening.startingMoves
+    );
+
+    if (
+      isAtStartingPosition &&
+      !isPlayerTurn &&
+      !isComplete &&
+      Object.keys(currentNode.children).length > 0
+    ) {
       const timer = setTimeout(() => {
         makeOpponentMove(currentNode, moveHistory);
-      }, 1500); // Slightly longer delay for the initial move
+      }, 1500);
 
       return () => clearTimeout(timer);
     }
   }, [
-    moveHistory.length,
+    moveHistory,
+    opening,
     isPlayerTurn,
     isComplete,
     currentNode,
@@ -335,12 +403,19 @@ export function useChessGame({
     isPlayerTurn,
     isComplete,
     selectedVariations,
+    wrongMoveCount,
+    canShowCorrectMove:
+      wrongMoveCount >= 3 &&
+      isPlayerTurn &&
+      !isComplete &&
+      Object.keys(currentNode.children).length > 0,
   };
 
   const actions: ChessGameActions = {
     onDrop,
     resetGame,
     handleVariationToggle,
+    showCorrectMove,
   };
 
   return { gameState, actions };

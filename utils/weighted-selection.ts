@@ -29,13 +29,17 @@ export function selectWeightedMove(
   const weights: { move: string; weight: number; cumulative: number }[] = [];
 
   for (const move of moves) {
-    const frequency = children[move].frequency || 0.5; // Default to 0.5 if no frequency
+    const frequency = children[move].frequency ?? 0.5; // Default to 0.5 if no frequency
     totalWeight += frequency;
     weights.push({
       move,
       weight: frequency,
       cumulative: totalWeight,
     });
+  }
+
+  if (totalWeight === 0) {
+    return moves[Math.floor(Math.random() * moves.length)];
   }
 
   // Generate random number between 0 and totalWeight
@@ -70,13 +74,21 @@ export function getMovesProbabilities(
   // Calculate total weight
   let totalWeight = 0;
   for (const move of moves) {
-    const frequency = children[move].frequency || 0.5;
+    const frequency = children[move].frequency ?? 0.5;
     totalWeight += frequency;
+  }
+
+  if (totalWeight === 0) {
+    const equalProbability = 1 / moves.length;
+    for (const move of moves) {
+      probabilities[move] = equalProbability;
+    }
+    return probabilities;
   }
 
   // Calculate probabilities
   for (const move of moves) {
-    const frequency = children[move].frequency || 0.5;
+    const frequency = children[move].frequency ?? 0.5;
     probabilities[move] = frequency / totalWeight;
   }
 

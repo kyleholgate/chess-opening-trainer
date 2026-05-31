@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
-import { OpeningNode } from "../types/opening";
+import { OpeningDefinition, OpeningNode } from "../types/opening";
 import { openingService } from "../services/openingService";
 import { TIMING } from "../constants/ui";
 
 // Application state interface - clear contract for consumers
 export interface ApplicationState {
+  openings: OpeningDefinition[];
+  selectedOpeningId: string;
+  selectedOpening: OpeningDefinition | null;
   openingTree: OpeningNode | null;
   isLoading: boolean;
   error: string | null;
@@ -16,6 +19,7 @@ export interface ApplicationState {
 
 // Actions interface - explicit operations available
 export interface ApplicationActions {
+  setSelectedOpeningId: (openingId: string) => void;
   setIsMinimized: (minimized: boolean) => void;
   setIsClosed: (closed: boolean) => void;
   setShowContactModal: (show: boolean) => void;
@@ -47,7 +51,8 @@ export interface ApplicationActions {
  * ```
  */
 export function useApplicationState(): ApplicationState & ApplicationActions {
-  const [openingTree, setOpeningTree] = useState<OpeningNode | null>(null);
+  const [openings, setOpenings] = useState<OpeningDefinition[]>([]);
+  const [selectedOpeningId, setSelectedOpeningId] = useState("scotch-gambit");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -64,8 +69,8 @@ export function useApplicationState(): ApplicationState & ApplicationActions {
         setError(null);
 
         // Use service layer for data loading with built-in timing
-        const parsedTree = await openingService.loadOpeningTree();
-        setOpeningTree(parsedTree);
+        const loadedOpenings = await openingService.loadOpenings();
+        setOpenings(loadedOpenings);
         setIsLoading(false);
       } catch (err) {
         const errorMessage =
@@ -90,9 +95,17 @@ export function useApplicationState(): ApplicationState & ApplicationActions {
     setIsRelaunching(false);
   };
 
+  const selectedOpening =
+    openings.find((opening) => opening.id === selectedOpeningId) ??
+    openings[0] ??
+    null;
+
   return {
     // State
-    openingTree,
+    openings,
+    selectedOpeningId,
+    selectedOpening,
+    openingTree: selectedOpening?.tree ?? null,
     isLoading,
     error,
     isMinimized,
@@ -100,6 +113,7 @@ export function useApplicationState(): ApplicationState & ApplicationActions {
     showContactModal,
     isRelaunching,
     // Actions
+    setSelectedOpeningId,
     setIsMinimized,
     setIsClosed,
     setShowContactModal,

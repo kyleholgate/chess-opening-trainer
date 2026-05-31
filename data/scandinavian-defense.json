@@ -1,0 +1,1020 @@
+{
+  "move": null,
+  "comment": "Scandinavian Defense - Root position",
+  "children": {
+    "e4": {
+      "move": "e4",
+      "comment": "White claims the center. Black immediately challenges it with the Scandinavian.",
+      "children": {
+        "d5": {
+          "move": "d5",
+          "comment": "The Scandinavian Defense. Black attacks e4 before White builds a big center.",
+          "children": {
+            "exd5": {
+              "move": "exd5",
+              "frequency": 0.67,
+              "comment": "White's main response. Black can recapture immediately or choose a sharper Modern Scandinavian.",
+              "children": {
+                "Qxd5": {
+                  "move": "Qxd5",
+                  "comment": "Classical Scandinavian: recover the pawn and accept that Nc3 gains a tempo.",
+                  "children": {
+                    "Nc3": {
+                      "move": "Nc3",
+                      "comment": "White attacks the queen. This is the main line and the most common test.",
+                      "children": {
+                        "Qa5": {
+                          "move": "Qa5",
+                          "comment": "The classical retreat. The queen keeps pressure on c3 and supports a solid ...c6/...e6 setup.",
+                          "children": {
+                            "d4": {
+                              "move": "d4",
+                              "frequency": 0.45,
+                              "comment": "White builds the center immediately.",
+                              "children": {
+                                "c6": {
+                                  "move": "c6",
+                                  "comment": "Creates a Caro-Kann-like structure and gives the queen a retreat to c7.",
+                                  "children": {
+                                    "Nf3": {
+                                      "move": "Nf3",
+                                      "comment": "White develops naturally and prepares kingside castling.",
+                                      "children": {
+                                        "Nf6": {
+                                          "move": "Nf6",
+                                          "comment": "Develop and pressure the center before committing the e-pawn.",
+                                          "children": {
+                                            "Bc4": {
+                                              "move": "Bc4",
+                                              "comment": "White aims at f7 and develops with tempo.",
+                                              "children": {
+                                                "Bf5": {
+                                                  "move": "Bf5",
+                                                  "comment": "Develop the light-squared bishop before ...e6 locks it in.",
+                                                  "children": {
+                                                    "Bd2": {
+                                                      "move": "Bd2",
+                                                      "comment": "White develops and can ask the queen another question later.",
+                                                      "children": {
+                                                        "e6": {
+                                                          "move": "e6",
+                                                          "comment": "Complete the solid c6/e6 shell after the bishop is active.",
+                                                          "children": {
+                                                            "O-O": {
+                                                              "move": "O-O",
+                                                              "comment": "White finishes development.",
+                                                              "children": {
+                                                                "Nbd7": {
+                                                                  "move": "Nbd7",
+                                                                  "comment": "Finish development and prepare queenside castling or central breaks.",
+                                                                  "isEndOfVariation": true
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "Nf6": {
+                                  "move": "Nf6",
+                                  "comment": "The other common main-line move order. Develop first, then build the ...c6/...e6 shell.",
+                                  "children": {
+                                    "Nf3": {
+                                      "move": "Nf3",
+                                      "comment": "White develops and keeps the central bind.",
+                                      "children": {
+                                        "c6": {
+                                          "move": "c6",
+                                          "comment": "Support the queen and prepare a compact Scandinavian structure.",
+                                          "children": {
+                                            "Bc4": {
+                                              "move": "Bc4",
+                                              "comment": "White pressures f7 and prepares Bd2.",
+                                              "children": {
+                                                "Bf5": {
+                                                  "move": "Bf5",
+                                                  "comment": "Activate the bishop before ...e6.",
+                                                  "children": {
+                                                    "Bd2": {
+                                                      "move": "Bd2",
+                                                      "comment": "White develops and questions Black's setup.",
+                                                      "children": {
+                                                        "e6": {
+                                                          "move": "e6",
+                                                          "comment": "Lock in the solid structure after the bishop is active.",
+                                                          "children": {
+                                                            "O-O": {
+                                                              "move": "O-O",
+                                                              "comment": "White castles.",
+                                                              "children": {
+                                                                "Nbd7": {
+                                                                  "move": "Nbd7",
+                                                                  "comment": "Finish development and prepare queenside castling or central breaks.",
+                                                                  "isEndOfVariation": true
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "Bf5": {
+                                          "move": "Bf5",
+                                          "comment": "The direct ECO main-line bishop development before ...c6 or ...e6.",
+                                          "children": {
+                                            "Bc4": {
+                                              "move": "Bc4",
+                                              "frequency": 0.36,
+                                              "comment": "The most common test, pointing at f7 before Black completes the shell.",
+                                              "children": {
+                                                "e6": {
+                                                  "move": "e6",
+                                                  "comment": "Close the diagonal only after the bishop has developed.",
+                                                  "children": {
+                                                    "O-O": {
+                                                      "move": "O-O",
+                                                      "comment": "White castles before deciding how to increase pressure.",
+                                                      "children": {
+                                                        "c6": {
+                                                          "move": "c6",
+                                                          "comment": "Build the familiar Scandinavian c6/e6 structure.",
+                                                          "isEndOfVariation": true
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "Bd2": {
+                                              "move": "Bd2",
+                                              "frequency": 0.21,
+                                              "comment": "A common developing move that also eyes the queen on a5.",
+                                              "children": {
+                                                "c6": {
+                                                  "move": "c6",
+                                                  "comment": "Give the queen a retreat and reinforce the center.",
+                                                  "children": {
+                                                    "Bc4": {
+                                                      "move": "Bc4",
+                                                      "comment": "White keeps developing with pressure on f7.",
+                                                      "children": {
+                                                        "e6": {
+                                                          "move": "e6",
+                                                          "comment": "Complete the compact light-square setup.",
+                                                          "isEndOfVariation": true
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "Ne5": {
+                                              "move": "Ne5",
+                                              "frequency": 0.16,
+                                              "comment": "The Gruenfeld variation idea, jumping into the center immediately.",
+                                              "children": {
+                                                "c6": {
+                                                  "move": "c6",
+                                                  "comment": "Challenge White to justify the advanced knight.",
+                                                  "children": {
+                                                    "g4": {
+                                                      "move": "g4",
+                                                      "comment": "A sharp forcing try against the developed bishop.",
+                                                      "children": {
+                                                        "Be6": {
+                                                          "move": "Be6",
+                                                          "comment": "The main practical retreat, keeping development coordinated.",
+                                                          "isEndOfVariation": true
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "Bd3": {
+                                              "move": "Bd3",
+                                              "frequency": 0.09,
+                                              "comment": "White offers a bishop trade to remove Black's active light-squared bishop.",
+                                              "children": {
+                                                "Bxd3": {
+                                                  "move": "Bxd3",
+                                                  "comment": "Trade the active bishop before White builds more pressure.",
+                                                  "children": {
+                                                    "Qxd3": {
+                                                      "move": "Qxd3",
+                                                      "comment": "White recaptures centrally.",
+                                                      "children": {
+                                                        "c6": {
+                                                          "move": "c6",
+                                                          "comment": "Stabilize the queen and central dark squares.",
+                                                          "isEndOfVariation": true
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "Bg4": {
+                                          "move": "Bg4",
+                                          "comment": "The Lasker variation, pinning the f3 knight before building the shell.",
+                                          "children": {
+                                            "h3": {
+                                              "move": "h3",
+                                              "frequency": 0.12,
+                                              "comment": "White asks the bishop to clarify its intentions.",
+                                              "children": {
+                                                "Bxf3": {
+                                                  "move": "Bxf3",
+                                                  "comment": "Remove the knight and give White a structural decision.",
+                                                  "children": {
+                                                    "Qxf3": {
+                                                      "move": "Qxf3",
+                                                      "comment": "White keeps the pawn structure intact.",
+                                                      "children": {
+                                                        "c6": {
+                                                          "move": "c6",
+                                                          "comment": "Return to the standard compact Scandinavian setup.",
+                                                          "isEndOfVariation": true
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "e5": {
+                                  "move": "e5",
+                                  "comment": "Anderssen counterattack idea: challenge White's center immediately.",
+                                  "children": {
+                                    "dxe5": {
+                                      "move": "dxe5",
+                                      "comment": "White accepts the pawn break.",
+                                      "children": {
+                                        "Bb4": {
+                                          "move": "Bb4",
+                                          "comment": "Develop with pressure before recovering central control.",
+                                          "children": {
+                                            "Bd2": {
+                                              "move": "Bd2",
+                                              "comment": "White blocks and develops.",
+                                              "children": {
+                                                "Nc6": {
+                                                  "move": "Nc6",
+                                                  "comment": "Increase pressure on e5 and develop actively.",
+                                                  "children": {
+                                                    "Nf3": {
+                                                      "move": "Nf3",
+                                                      "comment": "White develops and defends e5.",
+                                                      "isEndOfVariation": true
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "Nf3": {
+                              "move": "Nf3",
+                              "frequency": 0.25,
+                              "comment": "White develops before committing the d-pawn.",
+                              "children": {
+                                "Nf6": {
+                                  "move": "Nf6",
+                                  "comment": "Develop naturally and keep pressure on d5/e4 squares.",
+                                  "children": {
+                                    "d4": {
+                                      "move": "d4",
+                                      "comment": "White builds the center.",
+                                      "children": {
+                                        "c6": {
+                                          "move": "c6",
+                                          "comment": "Reinforce d5-style control and prepare a safe queen retreat.",
+                                          "children": {
+                                            "Bc4": {
+                                              "move": "Bc4",
+                                              "comment": "White develops aggressively.",
+                                              "children": {
+                                                "Bf5": {
+                                                  "move": "Bf5",
+                                                  "comment": "Activate the bishop before closing the diagonal.",
+                                                  "children": {
+                                                    "O-O": {
+                                                      "move": "O-O",
+                                                      "comment": "White castles.",
+                                                      "children": {
+                                                        "e6": {
+                                                          "move": "e6",
+                                                          "comment": "Black reaches the standard solid Scandinavian structure.",
+                                                          "isEndOfVariation": true
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "Bc4": {
+                                      "move": "Bc4",
+                                      "comment": "A common development-first setup before d4.",
+                                      "children": {
+                                        "Bg4": {
+                                          "move": "Bg4",
+                                          "comment": "Pin the knight and keep White's central push under pressure.",
+                                          "children": {
+                                            "h3": {
+                                              "move": "h3",
+                                              "comment": "White asks the bishop to decide.",
+                                              "children": {
+                                                "Bxf3": {
+                                                  "move": "Bxf3",
+                                                  "comment": "Remove the defender before returning to the solid setup.",
+                                                  "children": {
+                                                    "Qxf3": {
+                                                      "move": "Qxf3",
+                                                      "comment": "White recaptures.",
+                                                      "children": {
+                                                        "c6": {
+                                                          "move": "c6",
+                                                          "comment": "Build the compact Scandinavian structure and secure queen retreat squares.",
+                                                          "isEndOfVariation": true
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "Bc4": {
+                              "move": "Bc4",
+                              "frequency": 0.18,
+                              "comment": "White develops aggressively before d4.",
+                              "children": {
+                                "Nf6": {
+                                  "move": "Nf6",
+                                  "comment": "Meet activity with development and central pressure.",
+                                  "children": {
+                                    "Nf3": {
+                                      "move": "Nf3",
+                                      "comment": "White continues natural development.",
+                                      "children": {
+                                        "c6": {
+                                          "move": "c6",
+                                          "comment": "Build the resilient Scandinavian pawn shell.",
+                                          "children": {
+                                            "d4": {
+                                              "move": "d4",
+                                              "comment": "White claims space.",
+                                              "children": {
+                                                "Bf5": {
+                                                  "move": "Bf5",
+                                                  "comment": "The key move: get the bishop active before ...e6.",
+                                                  "isEndOfVariation": true
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "b4": {
+                              "move": "b4",
+                              "frequency": 0.06,
+                              "comment": "A gambit try to chase the queen and create queenside tactics.",
+                              "children": {
+                                "Qxb4": {
+                                  "move": "Qxb4",
+                                  "comment": "Accept the pawn, but be ready to step back before the queen gets trapped.",
+                                  "children": {
+                                    "Rb1": {
+                                      "move": "Rb1",
+                                      "comment": "White attacks the queen and hopes Black gets greedy.",
+                                      "children": {
+                                        "Qa5": {
+                                          "move": "Qa5",
+                                          "comment": "Return to safety. Do not drift into queen-trap tactics.",
+                                          "isEndOfVariation": true
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "g3": {
+                              "move": "g3",
+                              "frequency": 0.12,
+                              "comment": "Fianchetto setup. White develops smoothly and aims for pressure on the long diagonal.",
+                              "children": {
+                                "c6": {
+                                  "move": "c6",
+                                  "comment": "Support the queen and prepare the familiar c6/e6 structure.",
+                                  "children": {
+                                    "Bg2": {
+                                      "move": "Bg2",
+                                      "comment": "White completes the fianchetto.",
+                                      "children": {
+                                        "Nf6": {
+                                          "move": "Nf6",
+                                          "comment": "Develop and pressure the center.",
+                                          "children": {
+                                            "Nf3": {
+                                              "move": "Nf3",
+                                              "comment": "White continues natural development.",
+                                              "children": {
+                                                "Bf5": {
+                                                  "move": "Bf5",
+                                                  "comment": "Develop the light-squared bishop before ...e6.",
+                                                  "children": {
+                                                    "O-O": {
+                                                      "move": "O-O",
+                                                      "comment": "White castles.",
+                                                      "children": {
+                                                        "e6": {
+                                                          "move": "e6",
+                                                          "comment": "Complete the standard pawn shell.",
+                                                          "isEndOfVariation": true
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "Qd6": {
+                          "move": "Qd6",
+                          "comment": "Gubinsky-Melts Defense. The queen stays central and flexible but must be tied to development.",
+                          "children": {
+                            "d4": {
+                              "move": "d4",
+                              "comment": "White builds the center and prepares natural development.",
+                              "children": {
+                                "Nf6": {
+                                  "move": "Nf6",
+                                  "comment": "Develop and keep control of the center.",
+                                  "children": {
+                                    "Nf3": {
+                                      "move": "Nf3",
+                                      "comment": "White develops and prepares pressure with g3 or Bf4.",
+                                      "children": {
+                                        "c6": {
+                                          "move": "c6",
+                                          "comment": "Support the center and create queen retreat squares.",
+                                          "children": {
+                                            "g3": {
+                                              "move": "g3",
+                                              "comment": "White chooses the common fianchetto setup.",
+                                              "children": {
+                                                "Bg4": {
+                                                  "move": "Bg4",
+                                                  "comment": "Active development before the e-pawn is committed.",
+                                                  "children": {
+                                                    "Bg2": {
+                                                      "move": "Bg2",
+                                                      "comment": "White finishes the fianchetto.",
+                                                      "children": {
+                                                        "e6": {
+                                                          "move": "e6",
+                                                          "comment": "Stabilize the center and prepare development.",
+                                                          "children": {
+                                                            "O-O": {
+                                                              "move": "O-O",
+                                                              "comment": "White castles.",
+                                                              "children": {
+                                                                "Be7": {
+                                                                  "move": "Be7",
+                                                                  "comment": "Continue development with a compact setup.",
+                                                                  "isEndOfVariation": true
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "Qd8": {
+                          "move": "Qd8",
+                          "comment": "The conservative queen retreat. Black gives up activity to avoid further queen tempos.",
+                          "children": {
+                            "d4": {
+                              "move": "d4",
+                              "comment": "White takes the center.",
+                              "children": {
+                                "Nf6": {
+                                  "move": "Nf6",
+                                  "comment": "Develop and prepare the usual c6/e6 structure.",
+                                  "children": {
+                                    "Nf3": {
+                                      "move": "Nf3",
+                                      "comment": "White develops naturally.",
+                                      "children": {
+                                        "c6": {
+                                          "move": "c6",
+                                          "comment": "Build the compact Scandinavian structure.",
+                                          "children": {
+                                            "Bc4": {
+                                              "move": "Bc4",
+                                              "comment": "White develops aggressively.",
+                                              "children": {
+                                                "Bf5": {
+                                                  "move": "Bf5",
+                                                  "comment": "Develop the bishop before ...e6.",
+                                                  "children": {
+                                                    "O-O": {
+                                                      "move": "O-O",
+                                                      "comment": "White castles.",
+                                                      "children": {
+                                                        "e6": {
+                                                          "move": "e6",
+                                                          "comment": "Complete the solid pawn shell.",
+                                                          "isEndOfVariation": true
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "Bg4": {
+                                          "move": "Bg4",
+                                          "comment": "A sharper development choice in the Qd8 system.",
+                                          "children": {
+                                            "h3": {
+                                              "move": "h3",
+                                              "comment": "White questions the bishop.",
+                                              "children": {
+                                                "Bxf3": {
+                                                  "move": "Bxf3",
+                                                  "comment": "Trade off the knight before returning to structure.",
+                                                  "children": {
+                                                    "Qxf3": {
+                                                      "move": "Qxf3",
+                                                      "comment": "White recaptures.",
+                                                      "children": {
+                                                        "c6": {
+                                                          "move": "c6",
+                                                          "comment": "Rebuild the c6/e6 Scandinavian shell.",
+                                                          "isEndOfVariation": true
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "Nf3": {
+                      "move": "Nf3",
+                      "frequency": 0.18,
+                      "comment": "A flexible alternative to Nc3. White develops before asking the queen for a retreat.",
+                      "children": {
+                        "Bg4": {
+                          "move": "Bg4",
+                          "comment": "Pin the knight and develop actively.",
+                          "children": {
+                            "Be2": {
+                              "move": "Be2",
+                              "comment": "White breaks the pin by development.",
+                              "children": {
+                                "Nc6": {
+                                  "move": "Nc6",
+                                  "comment": "Develop and add central pressure.",
+                                  "children": {
+                                    "d4": {
+                                      "move": "d4",
+                                      "comment": "White transposes toward normal central play.",
+                                      "children": {
+                                        "O-O-O": {
+                                          "move": "O-O-O",
+                                          "comment": "Castle queenside and put the rook on the semi-open d-file.",
+                                          "isEndOfVariation": true
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "d4": {
+                      "move": "d4",
+                      "frequency": 0.12,
+                      "comment": "White builds the center before playing Nc3.",
+                      "children": {
+                        "Nc6": {
+                          "move": "Nc6",
+                          "comment": "Develop naturally and increase pressure on d4.",
+                          "children": {
+                            "Nf3": {
+                              "move": "Nf3",
+                              "comment": "White develops and supports the center.",
+                              "children": {
+                                "Bg4": {
+                                  "move": "Bg4",
+                                  "comment": "Pin the defender and keep pressure on d4.",
+                                  "children": {
+                                    "Be2": {
+                                      "move": "Be2",
+                                      "comment": "White breaks the pin by development.",
+                                      "children": {
+                                        "O-O-O": {
+                                          "move": "O-O-O",
+                                          "comment": "Put the rook on the semi-open d-file and prepare active play.",
+                                          "isEndOfVariation": true
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "Nf6": {
+                  "move": "Nf6",
+                  "comment": "Modern Scandinavian. Delay recapturing and invite sharper Portuguese or Icelandic structures.",
+                  "children": {
+                    "d4": {
+                      "move": "d4",
+                      "frequency": 0.5,
+                      "comment": "White supports the extra pawn and claims space.",
+                      "children": {
+                        "Bg4": {
+                          "move": "Bg4",
+                          "comment": "Portuguese Variation: active bishop pressure creates tactical chances.",
+                          "children": {
+                            "f3": {
+                              "move": "f3",
+                              "comment": "White challenges the bishop and weakens dark squares.",
+                              "children": {
+                                "Bf5": {
+                                  "move": "Bf5",
+                                  "comment": "Keep the bishop active and preserve pressure.",
+                                  "children": {
+                                    "c4": {
+                                      "move": "c4",
+                                      "comment": "White reinforces the extra pawn.",
+                                      "children": {
+                                        "e6": {
+                                          "move": "e6",
+                                          "comment": "Open lines and attack the d5 pawn with practical compensation.",
+                                          "children": {
+                                            "dxe6": {
+                                              "move": "dxe6",
+                                              "comment": "White accepts the pawn sacrifice.",
+                                              "children": {
+                                                "Nc6": {
+                                                  "move": "Nc6",
+                                                  "comment": "Develop with tempo and pressure, continuing the Portuguese-style compensation.",
+                                                  "isEndOfVariation": true
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "Nxd5": {
+                          "move": "Nxd5",
+                          "comment": "Modern Scandinavian main line: recover the pawn with the knight instead of entering a gambit immediately.",
+                          "children": {
+                            "Nf3": {
+                              "move": "Nf3",
+                              "comment": "White develops and prepares c4.",
+                              "children": {
+                                "g6": {
+                                  "move": "g6",
+                                  "comment": "Flexible kingside fianchetto setup against the space gain.",
+                                  "children": {
+                                    "c4": {
+                                      "move": "c4",
+                                      "comment": "White gains space and attacks the knight.",
+                                      "children": {
+                                        "Nb6": {
+                                          "move": "Nb6",
+                                          "comment": "The active retreat, keeping pieces coordinated.",
+                                          "isEndOfVariation": true
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "c4": {
+                      "move": "c4",
+                      "frequency": 0.35,
+                      "comment": "White tries to hold the pawn.",
+                      "children": {
+                        "e6": {
+                          "move": "e6",
+                          "comment": "Icelandic Gambit idea. Black plays for fast development and open lines.",
+                          "children": {
+                            "dxe6": {
+                              "move": "dxe6",
+                              "comment": "White accepts the challenge.",
+                              "children": {
+                                "Bxe6": {
+                                  "move": "Bxe6",
+                                  "comment": "Black develops with compensation and open diagonals.",
+                                  "isEndOfVariation": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "Bb5+": {
+                      "move": "Bb5+",
+                      "frequency": 0.15,
+                      "comment": "White develops with check instead of trying to hold the pawn immediately.",
+                      "children": {
+                        "Bd7": {
+                          "move": "Bd7",
+                          "comment": "Meet the check by developing a piece.",
+                          "children": {
+                            "Bc4": {
+                              "move": "Bc4",
+                              "comment": "White keeps pieces active.",
+                              "children": {
+                                "Bg4": {
+                                  "move": "Bg4",
+                                  "comment": "Pin and develop actively before recapturing the pawn.",
+                                  "children": {
+                                    "f3": {
+                                      "move": "f3",
+                                      "comment": "White chases the bishop.",
+                                      "children": {
+                                        "Bf5": {
+                                          "move": "Bf5",
+                                          "comment": "Retreat to an active square and keep development flowing.",
+                                          "isEndOfVariation": true
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "e5": {
+              "move": "e5",
+              "frequency": 0.11,
+              "comment": "White advances instead of taking. Black should challenge the chain immediately.",
+              "children": {
+                "c5": {
+                  "move": "c5",
+                  "comment": "Strike at d4 before White gets a free French-style bind.",
+                  "children": {
+                    "d4": {
+                      "move": "d4",
+                      "comment": "White builds a space advantage.",
+                      "children": {
+                        "Nc6": {
+                          "move": "Nc6",
+                          "comment": "Develop into the center and add pressure to d4.",
+                          "children": {
+                            "c3": {
+                              "move": "c3",
+                              "comment": "White supports the center.",
+                              "children": {
+                                "Bf5": {
+                                  "move": "Bf5",
+                                  "comment": "Develop actively before committing ...e6.",
+                                  "isEndOfVariation": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "Nc3": {
+              "move": "Nc3",
+              "frequency": 0.06,
+              "comment": "White defends e4 instead of taking on d5.",
+              "children": {
+                "dxe4": {
+                  "move": "dxe4",
+                  "comment": "Take the center pawn when White allows it.",
+                  "children": {
+                    "Nxe4": {
+                      "move": "Nxe4",
+                      "comment": "White recaptures.",
+                      "children": {
+                        "Nf6": {
+                          "move": "Nf6",
+                          "comment": "Develop with tempo and simplify if White exchanges.",
+                          "children": {
+                            "Nxf6+": {
+                              "move": "Nxf6+",
+                              "comment": "White trades.",
+                              "children": {
+                                "exf6": {
+                                  "move": "exf6",
+                                  "comment": "Recapture toward the center and keep a playable structure.",
+                                  "isEndOfVariation": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "d4": {
+              "move": "d4",
+              "frequency": 0.03,
+              "comment": "Blackmar-Diemer style. White offers a pawn for initiative.",
+              "children": {
+                "dxe4": {
+                  "move": "dxe4",
+                  "comment": "Accept the center pawn and make White prove compensation.",
+                  "children": {
+                    "Nc3": {
+                      "move": "Nc3",
+                      "comment": "White increases pressure on e4.",
+                      "children": {
+                        "Nf6": {
+                          "move": "Nf6",
+                          "comment": "Defend e4 and develop calmly.",
+                          "children": {
+                            "f3": {
+                              "move": "f3",
+                              "comment": "White offers another pawn to open lines.",
+                              "children": {
+                                "exf3": {
+                                  "move": "exf3",
+                                  "comment": "Accept, but be alert to White's development lead.",
+                                  "isEndOfVariation": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "Nf3": {
+              "move": "Nf3",
+              "frequency": 0.08,
+              "comment": "White develops without resolving the center.",
+              "children": {
+                "dxe4": {
+                  "move": "dxe4",
+                  "comment": "Take the e-pawn and ask White to recover it.",
+                  "children": {
+                    "Ng5": {
+                      "move": "Ng5",
+                      "comment": "White attacks e4 and f7 ideas.",
+                      "children": {
+                        "Nf6": {
+                          "move": "Nf6",
+                          "comment": "Develop, protect key squares, and prepare to consolidate.",
+                          "children": {
+                            "Nc3": {
+                              "move": "Nc3",
+                              "comment": "White adds pressure.",
+                              "children": {
+                                "Bf5": {
+                                  "move": "Bf5",
+                                  "comment": "Develop actively and keep the extra pawn defended.",
+                                  "isEndOfVariation": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

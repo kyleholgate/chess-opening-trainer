@@ -5,11 +5,12 @@ import {
   BoardDisplay,
   SidePanel,
   GameStatus,
+  OpeningSelector,
   BoardTheme,
   RETRO_BOARD_THEMES,
 } from "./chessGame";
 import GameControls from "./chessGame/GameControls";
-import { OpeningNode } from "../types/opening";
+import { OpeningDefinition, OpeningNode } from "../types/opening";
 import { useChessGame } from "../hooks/useChessGame";
 
 /**
@@ -24,8 +25,14 @@ import { useChessGame } from "../hooks/useChessGame";
  */
 
 interface ChessBoardProps {
-  /** Opening tree data for move validation and opponent responses */
-  openingTree: OpeningNode;
+  /** Selected opening data for move validation and opponent responses */
+  opening: OpeningDefinition;
+  /** All bundled openings the player can practice */
+  openings: OpeningDefinition[];
+  /** Currently selected opening id */
+  selectedOpeningId: string;
+  /** Called when the player switches opening drills */
+  onOpeningChange: (openingId: string) => void;
   /** Optional callback for game state changes */
   onGameStateChange?: (state: {
     position: string;
@@ -37,12 +44,15 @@ interface ChessBoardProps {
 }
 
 export default function ChessBoard({
-  openingTree,
+  opening,
+  openings,
+  selectedOpeningId,
+  onOpeningChange,
   onGameStateChange,
 }: ChessBoardProps) {
   // Use the chess game hook for all game logic
   const { gameState, actions } = useChessGame({
-    openingTree,
+    opening,
     onGameStateChange,
   });
 
@@ -58,10 +68,9 @@ export default function ChessBoard({
 
   // Get available variations for the side panel
   const getAvailableVariations = () => {
-    // Navigate to starting node to get variations
-    let node = openingTree;
-    const moves = ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Bc4"];
-    for (const move of moves) {
+    // Navigate to configured variation root to get opponent variations
+    let node = opening.tree;
+    for (const move of opening.variationRootMoves) {
       if (node.children[move]) {
         node = node.children[move];
       }
@@ -70,7 +79,7 @@ export default function ChessBoard({
     return Object.keys(node.children).map((move) => ({
       move,
       comment: node.children[move].comment || "",
-      frequency: node.children[move].frequency || 0.5,
+      frequency: node.children[move].frequency ?? 0.5,
     }));
   };
 
@@ -84,6 +93,7 @@ export default function ChessBoard({
           position={gameState.gamePosition}
           onPieceDrop={actions.onDrop}
           selectedTheme={selectedTheme}
+          boardOrientation={opening.boardOrientation}
           isPlayerTurn={gameState.isPlayerTurn}
           isComplete={gameState.isComplete}
         />
@@ -92,12 +102,19 @@ export default function ChessBoard({
         {/* Game Controls below the board */}
         <GameControls
           onReset={actions.resetGame}
+          onShowCorrectMove={actions.showCorrectMove}
           isComplete={gameState.isComplete}
+          canShowCorrectMove={gameState.canShowCorrectMove}
         />
       </div>
 
       {/* Side panel */}
       <div className="w-full lg:w-80">
+        <OpeningSelector
+          openings={openings}
+          selectedOpeningId={selectedOpeningId}
+          onOpeningChange={onOpeningChange}
+        />
         <SidePanel
           moveHistory={gameState.moveHistory}
           availableVariations={availableVariations}

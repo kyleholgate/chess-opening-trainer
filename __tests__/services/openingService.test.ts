@@ -22,6 +22,22 @@ jest.mock(
   { virtual: true }
 );
 
+jest.mock(
+  "../../data/scandinavian-defense.json",
+  () => ({
+    move: null,
+    children: {
+      e4: {
+        move: "e4",
+        children: {
+          d5: { move: "d5", children: {} },
+        },
+      },
+    },
+  }),
+  { virtual: true }
+);
+
 // Mock constants
 jest.mock("../../constants/ui", () => ({
   TIMING: {
@@ -71,7 +87,7 @@ describe("OpeningService", () => {
 
       const result = await loadPromise;
 
-      expect(mockParseOpeningTree).toHaveBeenCalledTimes(1);
+      expect(mockParseOpeningTree).toHaveBeenCalledTimes(2);
       expect(result).toEqual(mockParsedTree);
     });
 
@@ -123,6 +139,23 @@ describe("OpeningService", () => {
 
       expect(result).toEqual(mockParsedTree);
     });
+
+    it("should load all bundled opening definitions", async () => {
+      const mockParsedTree = { move: null, children: {} };
+      mockParseOpeningTree.mockReturnValue(mockParsedTree);
+
+      const loadPromise = openingService.loadOpenings();
+      jest.advanceTimersByTime(100);
+      const result = await loadPromise;
+
+      expect(result).toHaveLength(2);
+      expect(result.map((opening) => opening.id)).toEqual([
+        "scotch-gambit",
+        "scandinavian-defense",
+      ]);
+      expect(result[0].tree).toEqual(mockParsedTree);
+      expect(mockParseOpeningTree).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe("Multi-source support", () => {
@@ -131,7 +164,6 @@ describe("OpeningService", () => {
       mockParseOpeningTree.mockReturnValue(mockParsedTree);
 
       const loadPromise = openingService.loadOpeningFromSource("scotch-gambit");
-      jest.advanceTimersByTime(100);
       const result = await loadPromise;
 
       expect(result).toEqual(mockParsedTree);

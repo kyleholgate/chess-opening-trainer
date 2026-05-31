@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Chessboard } from "react-chessboard";
+import type { PieceRenderObject } from "react-chessboard";
 
 interface BoardTheme {
   name: string;
@@ -13,21 +14,22 @@ interface BoardDisplayProps {
   isPlayerTurn: boolean;
   isComplete: boolean;
   selectedTheme: BoardTheme;
+  boardOrientation: "white" | "black";
 }
 
 const pieces = [
-  "wp",
-  "wn",
-  "wb",
-  "wr",
-  "wq",
-  "wk",
-  "bp",
-  "bn",
-  "bb",
-  "br",
-  "bq",
-  "bk",
+  "wP",
+  "wN",
+  "wB",
+  "wR",
+  "wQ",
+  "wK",
+  "bP",
+  "bN",
+  "bB",
+  "bR",
+  "bQ",
+  "bK",
 ];
 
 export default function BoardDisplay({
@@ -36,23 +38,18 @@ export default function BoardDisplay({
   isPlayerTurn,
   isComplete,
   selectedTheme,
+  boardOrientation,
 }: BoardDisplayProps) {
   // Custom pieces with PNG images
   const customPieces = useMemo(() => {
-    const pieceComponents: {
-      [key: string]: ({
-        squareWidth,
-      }: {
-        squareWidth: number;
-      }) => React.ReactElement;
-    } = {};
+    const pieceComponents: PieceRenderObject = {};
     pieces.forEach((piece) => {
-      pieceComponents[piece] = ({ squareWidth }) => (
+      pieceComponents[piece] = () => (
         <div
           style={{
-            width: squareWidth,
-            height: squareWidth,
-            backgroundImage: `url(/pieces/${piece}.svg)`,
+            width: "100%",
+            height: "100%",
+            backgroundImage: `url(/pieces/${piece.toLowerCase()}.svg)`,
             backgroundSize: "100%",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center",
@@ -67,21 +64,24 @@ export default function BoardDisplay({
     <div className="win95-raised p-2">
       <div className="w-full max-w-[400px] sm:max-w-[500px] lg:max-w-[600px] xl:max-w-[700px] mx-auto">
         <Chessboard
-          position={position}
-          onPieceDrop={onPieceDrop}
-          boardOrientation="white"
-          arePiecesDraggable={isPlayerTurn && !isComplete}
-          customDarkSquareStyle={{
-            backgroundColor: selectedTheme.darkSquares,
+          options={{
+            position,
+            onPieceDrop: ({ sourceSquare, targetSquare }) =>
+              targetSquare ? onPieceDrop(sourceSquare, targetSquare) : false,
+            boardOrientation,
+            allowDragging: isPlayerTurn && !isComplete,
+            darkSquareStyle: {
+              backgroundColor: selectedTheme.darkSquares,
+            },
+            lightSquareStyle: {
+              backgroundColor: selectedTheme.lightSquares,
+            },
+            dropSquareStyle: {
+              boxShadow: "inset 0 0 1px 4px #FF0000",
+            },
+            pieces: customPieces,
+            animationDurationInMs: 200,
           }}
-          customLightSquareStyle={{
-            backgroundColor: selectedTheme.lightSquares,
-          }}
-          customDropSquareStyle={{
-            boxShadow: "inset 0 0 1px 4px #FF0000",
-          }}
-          customPieces={customPieces}
-          animationDuration={200}
         />
       </div>
     </div>

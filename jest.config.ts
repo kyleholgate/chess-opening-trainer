@@ -31,6 +31,10 @@ const config: Config = {
     "<rootDir>/node_modules/",
     "<rootDir>/.open-next/",
   ],
+  modulePathIgnorePatterns: [
+    "<rootDir>/.next/",
+    "<rootDir>/.open-next/",
+  ],
 
   // Transform configuration
   transform: {
@@ -38,6 +42,7 @@ const config: Config = {
       "ts-jest",
       {
         tsconfig: {
+          rootDir: ".",
           jsx: "react-jsx",
         },
       },
