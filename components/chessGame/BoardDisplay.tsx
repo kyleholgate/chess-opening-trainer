@@ -40,7 +40,7 @@ export default function BoardDisplay({
   selectedTheme,
   boardOrientation,
 }: BoardDisplayProps) {
-  // Custom pieces with PNG images
+  // Custom pieces with SVG images
   const customPieces = useMemo(() => {
     const pieceComponents: PieceRenderObject = {};
     pieces.forEach((piece) => {
@@ -48,11 +48,13 @@ export default function BoardDisplay({
         <div
           style={{
             width: "100%",
-            height: "100%",
+            aspectRatio: "1 / 1",
             backgroundImage: `url(/pieces/${piece.toLowerCase()}.svg)`,
-            backgroundSize: "100%",
+            backgroundSize: "contain",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center",
+            pointerEvents: "none",
+            userSelect: "none",
           }}
         />
       );
